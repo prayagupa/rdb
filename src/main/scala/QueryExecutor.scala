@@ -1,6 +1,7 @@
 import java.sql.ResultSet
+import java.sql.{Connection, DriverManager}
 
-import java.sql.{Connection,DriverManager}
+import QueryExecutor.sharedConn
 
 /**
   * Created by prayagupd
@@ -9,19 +10,19 @@ import java.sql.{Connection,DriverManager}
 
 object QueryExecutor {
 
-  val url = "jdbc:mysql://localhost:8889/mysql"
-  val driver = "com.mysql.jdbc.Driver"
+  val url = "jdbc:mysql://localhost:3306/updupd"
+  val driver = "com.mysql.cj.jdbc.Driver"
   val username = "root"
   val password = "root"
-  var connection:Connection = _
+  var sharedConn:Connection = _
 
   Class.forName(driver)
-  connection = DriverManager.getConnection(url, username, password)
+  sharedConn = DriverManager.getConnection(url, username, password)
 
   def queryWithSharedConnection(query: String, fields: Tuple2[String, String]): Long = {
     val startTime = System.nanoTime()
     try {
-      val statement = connection.createStatement
+      val statement = sharedConn.createStatement
       val rs = statement.executeQuery(query)
       while (rs.next) {
         val v1 = rs.getString(fields._1)
@@ -29,14 +30,19 @@ object QueryExecutor {
         println(s"$fields._1 => $v1, $fields._2 => $v2")
       }
       println(s"time=${(startTime - System.nanoTime())/(1000 * 1000 * 1000)}")
-      return startTime
+      startTime
     } catch {
-      case e: Exception => e.printStackTrace
+      case e: Exception =>
+        e.printStackTrace
+        0
     }
-    return 0
+    0
   }
 
   def querySeparateConnection(query: String, fields: Tuple2[String, String]): Long = {
+
+    val connection = DriverManager.getConnection(url, username, password)
+
     val startTime = System.nanoTime()
     try {
       val statement = connection.createStatement
@@ -46,13 +52,15 @@ object QueryExecutor {
         val v2 = rs.getString(fields._2)
         println(s"$fields._1 => $v1, $fields._2 => $v2")
         println(s"time=${(startTime - System.nanoTime())/(1000 * 1000 * 1000)}")
-        return startTime
       }
+      startTime
     } catch {
-      case e: Exception => e.printStackTrace
+      case e: Exception =>
+        e.printStackTrace
+        startTime
     } finally {
       connection.close
     }
-    return 0
+    startTime
   }
 }
