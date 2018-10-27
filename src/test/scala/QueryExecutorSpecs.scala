@@ -7,9 +7,9 @@ class QueryExecutorSpecs extends org.scalatest.FunSuite {
 
   val TableName = "Inventory"
 
-  ignore("sends 100 requests with same connection being opened") {
+  test("sends 100 requests with same connection being opened") {
     val average = Range.inclusive(1, 100).map { i =>
-      QueryExecutor.queryWithSharedConnection(s"select * from $TableName", ("warehouse", "sku"))
+      QueryExecutor.queryWithSharedConnection(s"select * from $TableName", ("warehouse", "sku", "qty"))
     }.reduce((a, b) => a + b) / 100
 
     println("================ shared =======================")
@@ -20,9 +20,9 @@ class QueryExecutorSpecs extends org.scalatest.FunSuite {
 
   //TODO execute above as concurrent requests
 
-  test("sends 100 requests with individual connection") {
+  ignore("sends 100 requests with individual connection") {
     val average = Range.inclusive(1, 100).map { i =>
-      QueryExecutor.querySeparateConnection(s"select * from $TableName", ("warehouse", "sku"))
+      QueryExecutor.querySeparateConnection(s"select * from $TableName", ("warehouse", "sku", "qty"))
     }.reduce((a, b) => a + b) / 100
 
     println("================ Individual =======================")
