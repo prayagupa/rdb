@@ -29,14 +29,13 @@ object QueryExecutor {
         val v3 = rs.getString(fields._3)
         println(s"${fields._1} => $v1, ${fields._2} => $v2, ${fields._3} => $v3")
       }
-      println(s"time=${(startTime - System.nanoTime()) / (1000 * 1000 * 1000)}")
-      startTime
+      println(s"time=${System.nanoTime() - startTime}")
+      System.nanoTime() - startTime
     } catch {
       case e: Exception =>
-        e.printStackTrace()
+        println(e.printStackTrace())
         0
     }
-    0
   }
 
   def querySeparateConnection(query: String, fields: Tuple3[String, String, String]): Long = {
@@ -54,14 +53,12 @@ object QueryExecutor {
         println(s"${fields._1} => $v1, ${fields._2} => $v2, ${fields._3} => $v3")
         println(s"time=${(startTime - System.nanoTime()) / (1000 * 1000 * 1000)}")
       }
-      startTime
     } catch {
       case e: Exception =>
         e.printStackTrace()
-        startTime
     } finally {
       privateConnection.close()
     }
-    startTime
+    System.nanoTime() - startTime
   }
 }

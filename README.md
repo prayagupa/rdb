@@ -19,3 +19,25 @@ create table Inventory (warehouse VARCHAR(20), sku VARCHAR(20), qty int);
 
 insert into Inventory VALUES('De Moines', 'sku-1', 88);
 ```
+
+results:
+
+shared connection:
+
+```
+================ shared =======================
+=================total: 157ms=======================
+=================average: 1ms=======================
+================ shared =======================
+```
+
+One connection for each req:
+
+note there is cost of creating connection at run time as well.
+
+```
+  ================ Individual ==========================
+  =================total: 259ms=======================
+  =================average: 2ms=============
+  ================ Individual ==========================
+```
