@@ -18,6 +18,8 @@ use updupd;
 create table Inventory (warehouse VARCHAR(20), sku VARCHAR(20), qty int);
 
 insert into Inventory VALUES('De Moines', 'sku-1', 88);
+insert into Inventory VALUES('Seattle', 'sku-2', 99);
+insert into Inventory VALUES('Tacoma', 'sku-3', 11);
 ```
 
 results:
