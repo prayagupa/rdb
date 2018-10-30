@@ -4,14 +4,28 @@ import doobie.implicits._
 import cats._
 import cats.effect._
 import cats.implicits._
+import doobie.hikari.HikariTransactor
 import doobie.util.transactor.Transactor.Aux
 
-import scala.collection.immutable
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 object DoobieExamples {
 
   implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.Implicits.global)
+
+  val poolTransactor: Resource[IO, HikariTransactor[IO]] =
+    for {
+      ce <- ExecutionContexts.fixedThreadPool[IO](32)
+      te <- ExecutionContexts.cachedThreadPool[IO]
+      xa <- HikariTransactor.newHikariTransactor[IO](
+        "com.mysql.cj.jdbc.Driver",
+        "jdbc:mysql://localhost:3306/updupd",
+        "root",
+        "r00t",
+        connectEC = ce,
+        transactEC = te
+      )
+    } yield xa
 
   /**
     * [error]  both lazy value AsyncBlobIO in trait Instances of type => cats.effect.Async[doobie.free.BlobIO]
@@ -85,5 +99,20 @@ object DoobieExamples {
         println("error: " + value)
     }.unsafeRunSync()
 
+    def insert(warehouse: String, sku: String, qty: Int): Future[Int] = {
+
+      //fr"insert into Inventory(warehouse, sku, qty) values(?, ?, ?)"
+
+      fr"insert into Inventory(warehouse, sku, qty) values($warehouse, $sku, $qty)"
+        //.execWith(HPS.set(("SB", "sku-004", 10)))
+        .update
+        .run
+        .transact(transactor)
+        .unsafeToFuture()
+    }
+
+    val res = insert("San Bruno", "sku-004", 10)
+    Thread.sleep(1000)
+    println("inserted data: " + res)
   }
 }

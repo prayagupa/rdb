@@ -4,7 +4,9 @@ version := "1.0"
 
 scalaVersion := "2.12.7"
 
-scalacOptions ++= Seq("-Ypartial-unification") // 2.11.9+
+scalacOptions ++= Seq(
+  "-Ypartial-unification"
+)
 
 libraryDependencies ++= Seq(
 
