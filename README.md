@@ -43,3 +43,13 @@ note there is cost of creating connection at run time as well.
   =================average: 2ms=============
   ================ Individual ==========================
 ```
+
+
+oracle
+------
+
+```
+select * from v$version;
+
+"CORE	12.1.0.2.0	Production"
+```

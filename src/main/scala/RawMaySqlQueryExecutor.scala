@@ -1,14 +1,14 @@
 import java.sql.ResultSet
 import java.sql.{Connection, DriverManager}
 
-import RawQueryExecutor.sharedConn
+import RawMaySqlQueryExecutor.sharedConn
 
 /**
   * Created by prayagupd
   * on 1/31/17.
   */
 
-object RawQueryExecutor {
+object RawMaySqlQueryExecutor {
 
   val url = "jdbc:mysql://localhost:3306/updupd"
   val driver = "com.mysql.cj.jdbc.Driver"

@@ -30,7 +30,7 @@ object FpQueryExecutor {
 
     def query[a](query: String): IO[List[(String, String, Int)]] = IO {
       val rs = connection.createStatement().executeQuery(query)
-      var list = ListBuffer.empty[Tuple3[String, String, Int]]
+      val list = ListBuffer.empty[Tuple3[String, String, Int]]
 
       while (rs.next()) {
         list.append(

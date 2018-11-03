@@ -1,15 +1,19 @@
+package cats
 
-import doobie._
-import doobie.implicits._
-import cats._
-import cats.effect._
-import cats.implicits._
+import cats.effect.{ContextShift, IO, Resource}
 import doobie.hikari.HikariTransactor
 import doobie.util.transactor.Transactor.Aux
+import doobie.{ConnectionIO, ExecutionContexts, Transactor}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object DoobieExamples {
+object DoobieMySQLExamples {
+
+  import cats._
+  import cats.implicits._
+
+  import doobie.syntax
+  import doobie.implicits._
 
   implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.Implicits.global)
 
@@ -69,6 +73,7 @@ object DoobieExamples {
     ////
     ////
     val yo = transactor.yolo
+
     import yo._
 
     sql"select sku, warehouse from Inventory"
@@ -80,7 +85,13 @@ object DoobieExamples {
     ////
 
     final case class Inventory(warehouse: String, sku: String, qty: Int)
+
     object Inventory {
+      val warehouse = "warehouse"
+      val sku = "sku"
+      val qty = "qty"
+
+      //fields can not be interpolated
       private val select = fr"select warehouse, sku, qty"
       private val from = fr"from Inventory"
 
@@ -99,10 +110,11 @@ object DoobieExamples {
         println("error: " + value)
     }.unsafeRunSync()
 
+    /////
+    /////
+    /////
+
     def insert(warehouse: String, sku: String, qty: Int): Future[Int] = {
-
-      //fr"insert into Inventory(warehouse, sku, qty) values(?, ?, ?)"
-
       fr"insert into Inventory(warehouse, sku, qty) values($warehouse, $sku, $qty)"
         //.execWith(HPS.set(("SB", "sku-004", 10)))
         .update
