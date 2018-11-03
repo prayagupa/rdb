@@ -53,3 +53,6 @@ select * from v$version;
 
 "CORE	12.1.0.2.0	Production"
 ```
+
+takes `~200ms` could be because of oracle connection is via on VPN.
+Weird that `WHERE ROWNUM <=1` adds increases latency.
