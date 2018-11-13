@@ -15,7 +15,8 @@ docker exec -it 0cad383c1249 mysql -u root -p
 create database updupd;
 use updupd;
 
-create table Inventory (warehouse VARCHAR(20), sku VARCHAR(20), qty int);
+CREATE TABLE Inventory (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, warehouse VARCHAR(20), sku VARCHAR(20), qty int);
+-- ALTER TABLE Inventory ADD PRIMARY KEY(id);
 
 insert into Inventory VALUES('De Moines', 'sku-1', 88);
 insert into Inventory VALUES('Seattle', 'sku-2', 99);

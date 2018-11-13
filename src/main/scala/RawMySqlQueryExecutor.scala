@@ -1,20 +1,28 @@
 import java.sql.ResultSet
 import java.sql.{Connection, DriverManager}
+import java.util.Properties
 
-import RawMaySqlQueryExecutor.sharedConn
+import RawMySqlQueryExecutor.sharedConn
 
 /**
   * Created by prayagupd
   * on 1/31/17.
   */
 
-object RawMaySqlQueryExecutor {
+object RawMySqlQueryExecutor {
 
   val url = "jdbc:mysql://localhost:3306/updupd"
   val driver = "com.mysql.cj.jdbc.Driver"
   val username = "root"
   val password = "r00t"
-  val sharedConn: Connection = DriverManager.getConnection(url, username, password)
+
+  val properties = new Properties()
+  properties.put("user", username)
+  properties.put("password", password)
+  properties.put("connectTimeout", "10") //only connect timeout not transaction timeout
+
+  val sharedConn1: Connection = DriverManager.getConnection(url, username, password)
+  val sharedConn: Connection = DriverManager.getConnection(url, properties)
 
   Class.forName(driver)
 

@@ -23,10 +23,10 @@ object OracleSqlExecutor extends App {
 
   import Db._
 
-  def connection(url: String, username: String, password: String): IO[Throwable, Connection] =
+  def getConnection(url: String, username: String, password: String): IO[Throwable, Connection] =
     IO.sync(DriverManager.getConnection(url, username, password))
 
-  def statement(connection: Connection): IO[Throwable, Statement] =
+  def createStatement(connection: Connection): IO[Throwable, Statement] =
     IO.sync(connection.createStatement())
 
   def selectAll(query: String)(statement: Statement): IO[Throwable, ResultSet] =
@@ -59,8 +59,8 @@ object OracleSqlExecutor extends App {
     }
 
   def program[a: TypeTag]: IO[Throwable, List[List[String]]] =
-    connection(url, username, password).flatMap { conn =>
-      statement(conn).flatMap { st =>
+    getConnection(url, username, password).flatMap { conn =>
+      createStatement(conn).flatMap { st =>
         selectAll("select active from orders")(st).flatMap { rs =>
           asResult[a](rs).flatMap { r =>
             IO.sync {
@@ -72,10 +72,10 @@ object OracleSqlExecutor extends App {
       }
     }
 
-  //  def program: IO[Throwable, ResultSet] = for {
-  //    connection: Connection <- connections
-  //    statement: Statement <- statement(IO(connection))
-  //    result: ResultSet <- read("select active from chat_queue")(statement)
-  //  } yield result
+//    def jdbcProgram: IO[Throwable, ResultSet] = for {
+//      conn <- getConnection(url, username, password)
+//      statement: Statement <- createStatement(conn)
+//      result: ResultSet <- selectAll(query = "select active from orders")(statement)
+//    } yield result
 
 }

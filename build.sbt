@@ -24,3 +24,7 @@ libraryDependencies ++= Seq(
   "mysql" % "mysql-connector-java" % "8.0.11",
   "org.scalatest" %% "scalatest" % "3.0.4"
 )
+
+resolvers ++= Seq(
+  "maven2" at "http://central.maven.org/maven2"
+)

@@ -9,7 +9,7 @@ class RawMaySqlQueryExecutorSpecs extends org.scalatest.FunSuite {
 
   test("sends 100 requests with same connection being opened") {
     val total = Range.inclusive(1, 100).map { i =>
-      RawMaySqlQueryExecutor
+      RawMySqlQueryExecutor
         .queryWithSharedConnection(s"select * from $TableName", ("warehouse", "sku", "qty"))
     }.reduce((a, b) => a + b)
 
@@ -24,7 +24,7 @@ class RawMaySqlQueryExecutorSpecs extends org.scalatest.FunSuite {
 
   test("sends 100 requests with individual connection") {
     val total = Range.inclusive(1, 100).map { i =>
-      RawMaySqlQueryExecutor.querySeparateConnection(s"select * from $TableName", ("warehouse", "sku", "qty"))
+      RawMySqlQueryExecutor.querySeparateConnection(s"select * from $TableName", ("warehouse", "sku", "qty"))
     }.reduce((a, b) => a + b)
 
     println("================ Individual ==========================")
