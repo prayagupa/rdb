@@ -5,6 +5,7 @@ import java.util.UUID
 import cats.DoobieMySQLExamples.connection
 import cats.effect.{ContextShift, IO, Resource}
 import doobie.hikari.HikariTransactor
+import doobie.util.fragment.Fragment
 import doobie.util.transactor.Transactor.Aux
 import doobie.util.update.Update
 import doobie.{ConnectionIO, ExecutionContexts, Transactor}
@@ -88,18 +89,21 @@ object DoobieMySQLExamples {
         println("error: " + value)
     }.unsafeRunSync()
 
-    val res = Inventory.insert("San Bruno", "sku-004", 10)
+    val res = Inventory.insert("San Bruno", "sku-008", 10)
     Thread.sleep(1000)
     println("inserted data: " + res)
 
+    println("===========================================")
+    //Inventory.lastTransactionId
+
     def rollback(implicit executionContext: ExecutionContext) = {
       val transaction1: doobie.ConnectionIO[Int] =
-        fr"insert into Inventory(warehouse, sku, qty) values('warehouse-good', 'good-sku-1', 11)"
+        fr"INSERT INTO Inventory(warehouse, sku, qty) VALUES('warehouse-good', 'good-sku-1', 11)"
           .update
           .run
 
       val transaction2: doobie.ConnectionIO[Int] =
-        fr"insert into Inventory(warehouse, sku, qty) values('warehouse-bad', 'good-sku-2', 'i m not number')"
+        fr"INSERT INTO Inventory(warehouse, sku, qty) VALUES('warehouse-bad', 'good-sku-2', 'i m not number')"
           .update
           .run
 
@@ -116,8 +120,7 @@ object DoobieMySQLExamples {
     }
 
     //rollback(ExecutionContext.Implicits.global)
-
-    //batchExample
+    InventoryApi.Inventory.batchInsert
   }
 
   def transact[a](f: ConnectionIO[a]): IO[a] = {
@@ -180,7 +183,7 @@ object InventoryApi {
     def uuid = uuid1.take(10)
 
     def batchInsert = {
-      val values = List.fill(4)(
+      val values = List.fill(2)(
         (s"warehouse-$uuid", s"sku-$uuid", Random.nextInt())
       )
       val sql = "INSERT INTO Inventory (warehouse, sku, qty) VALUES (?, ?, ?)"
@@ -192,7 +195,31 @@ object InventoryApi {
 
       import scala.concurrent.duration._
       val r = Await.result(resultSet, 3 seconds)
-      println("batch: " + r)
+      println("batch inserted: " + r)
+    }
+
+    def lastTransactionId = {
+
+      val sql1 = "UPDATE Inventory SET warehouse = 'SF new-warehouse' WHERE id=1;"
+      val sql2 = "INSERT INTO Inventory (warehouse, sku, qty) VALUES('TAC', 'SSSKKKUUU', 100);"
+      val sql3 = "select last_insert_id();"
+
+      val t1: doobie.ConnectionIO[Int] = Fragment.const(sql1).update.run
+      val t2: doobie.ConnectionIO[Int] = Fragment.const(sql2)
+        .update
+        .withUniqueGeneratedKeys[Int]("id")
+
+      val lastInserted =
+        (for {
+          _ <- fr"UPDATE Inventory SET warehouse = 'SF new-warehouse' WHERE id=1;".update.run
+          insertedId <- fr"INSERT INTO Inventory (warehouse, sku, qty) VALUES('TAC', 'SSSKKKUUU', 'hello');"
+            .update
+            .withUniqueGeneratedKeys[Int]("id")
+        } yield insertedId)
+          .transact(connection)
+          .unsafeRunSync()
+
+      println("lastInserted: " + lastInserted)
     }
   }
 
