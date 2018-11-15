@@ -25,9 +25,9 @@ object DoobieOracleExamples {
 
   val transactor: Aux[IO, Unit] = Transactor.fromDriverManager[IO](
     "oracle.jdbc.driver.OracleDriver",
-    "jdbc:oracle:thin:@upd.upd.com:5001/updupd",
-    "updupd",
-    ""
+    "jdbc:oracle:thin:@localhost:1521/xe",
+    "SYSTEM",
+    "oracle"
   )
 
   case class DbBoolean(boolean: Boolean)
@@ -54,22 +54,22 @@ object DoobieOracleExamples {
     //    30-OCT-18 03.51.23.381000000 PM
     //    31-OCT-18 10.23.33.770000000 AM
 
-    val res = transaction {
-      fr"select created FROM orders"
-        .query[Timestamp]
+    val orderCreated = transaction {
+      fr"select * FROM CustomerOrder"
+        .query[(Int, String, String)]
         .to[List]
     }
 
-    println(res.unsafeRunSync())
+    orderCreated.map(c => println("orderCreated: " + c)).unsafeRunSync()
 
     //read boolean
 
     val resBool = selectAll[String] {
-      fr"select active FROM orders"
+      fr"select active FROM CustomerOrder"
     }
 
     val resBoolToStr = selectAll[String] {
-      fr"SELECT CASE WHEN active IS NULL THEN 'true' else 'false' END FROM orders"
+      fr"SELECT CASE WHEN active IS NULL THEN 'true' else 'false' END FROM CustomerOrder"
     }
 
     println(resBoolToStr.unsafeRunSync())
@@ -80,7 +80,7 @@ object DoobieOracleExamples {
 
     import DbBoolean._
 
-    fr"select canceled FROM orders"
+    fr"select active FROM CustomerOrder"
       .query[DbBoolean]
       .to[List]
       .transact(transactor)
@@ -98,10 +98,10 @@ object DoobieOracleExamples {
 //    DbBoolean(true)
 
     val dbBoolean = selectAll[DbBoolean] {
-      fr"select canceled FROM orders"
+      fr"select active FROM CustomerOrder"
     }
 
-    println(dbBoolean.unsafeRunSync())
+    println("dbBoolean: " + dbBoolean.unsafeRunSync())
   }
 
   def selectAll[a: Read](tx: Fragment): IO[List[a]] = {

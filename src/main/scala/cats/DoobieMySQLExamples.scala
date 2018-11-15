@@ -25,15 +25,15 @@ object DoobieMySQLExamples {
 
   lazy val poolTransactor: Resource[IO, HikariTransactor[IO]] =
     for {
-      ce <- ExecutionContexts.fixedThreadPool[IO](32)
-      te <- ExecutionContexts.cachedThreadPool[IO]
+      connectionPool <- ExecutionContexts.fixedThreadPool[IO](32)
+      transactorPool <- ExecutionContexts.cachedThreadPool[IO]
       xa <- HikariTransactor.newHikariTransactor[IO](
         "com.mysql.cj.jdbc.Driver",
         "jdbc:mysql://localhost:3306/updupd",
         "root",
         "r00t",
-        connectEC = ce,
-        transactEC = te
+        connectEC = connectionPool,
+        transactEC = transactorPool
       )
     } yield xa
 
