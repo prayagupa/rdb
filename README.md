@@ -63,14 +63,16 @@ CREATE TABLE Config(
 );
 ```
 
-oracle
+[oracle 12 db]()
 ------
 
 ```
 -- https://github.com/MaksymBilenko/docker-oracle-apex
+-- sudo mkdir -p /data/oracle
 
 docker pull sath89/oracle-12c
 docker run -d -p 8080:8080 -p 1521:1521 sath89/oracle-12c
+
 sqlplus system/oracle@//localhost:1521/xe
 SYSTEM@oracle
 
@@ -89,3 +91,5 @@ INSERT INTO CustomerOrder VALUES(1, 'steve jobs', '01', CURRENT_TIMESTAMP);
 
 takes `~200ms` could be because of oracle connection is via on VPN.
 Weird that `WHERE ROWNUM <=1` adds increases latency.
+
+for testing h2-oracle [http://www.h2database.com/html/features.html](http://www.h2database.com/html/features.html)

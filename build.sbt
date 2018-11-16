@@ -22,9 +22,12 @@ libraryDependencies ++= Seq(
 
   "org.scalaz" %% "scalaz-zio" % "0.3.1",
   "mysql" % "mysql-connector-java" % "8.0.11",
-  "org.scalatest" %% "scalatest" % "3.0.4"
+  "org.scalatest" %% "scalatest" % "3.0.4",
+  "com.h2database" % "h2" % "1.4.197"
 )
 
 resolvers ++= Seq(
   "maven2" at "http://central.maven.org/maven2"
 )
+
+enablePlugins(DockerComposePlugin)

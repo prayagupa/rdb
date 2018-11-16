@@ -20,4 +20,9 @@ services:
   
   oracledb:
      image: sath89/oracle-12c
+     ports:
+       - 1521:1521
+     volumes:
+     #       - /Volumes/oracle:/u01/app/oracle
+             - ./db:/docker-entrypoint-initdb.d
 

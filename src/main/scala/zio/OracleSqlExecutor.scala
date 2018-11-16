@@ -12,10 +12,10 @@ import reflect.runtime.universe._
 object OracleSqlExecutor extends App {
 
   object Db {
-    val url = "jdbc:oracle:thin:@updupd.com:1521/order-api"
+    val url = "jdbc:oracle:thin:@localhost:1521/xe"
     val driver = "oracle.jdbc.driver.OracleDriver"
-    val username = "updupd"
-    val password = ""
+    val username = "SYSTEM"
+    val password = "oracle"
   }
 
   import scalaz._
@@ -61,7 +61,7 @@ object OracleSqlExecutor extends App {
   def program[a: TypeTag]: IO[Throwable, List[List[String]]] =
     getConnection(url, username, password).flatMap { conn =>
       createStatement(conn).flatMap { st =>
-        selectAll("select active from orders")(st).flatMap { rs =>
+        selectAll("select active from CustomerOrder")(st).flatMap { rs =>
           asResult[a](rs).flatMap { r =>
             IO.sync {
               println(r)
