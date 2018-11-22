@@ -8,22 +8,27 @@ scalacOptions ++= Seq(
   "-Ypartial-unification"
 )
 
+val LogbackVersion = "1.2.3"
+
 libraryDependencies ++= Seq(
 
   // Start with this one
   "org.tpolecat" %% "doobie-core" % "0.6.0",
 
-  // And add any of these as needed
+  "ch.qos.logback" % "logback-classic" % LogbackVersion % "runtime",
+  "ch.qos.logback" % "logback-core" % LogbackVersion,
+  "net.logstash.logback" % "logstash-logback-encoder" % "5.2",
   "org.tpolecat" %% "doobie-h2" % "0.6.0", // H2 driver 1.4.197 + type mappings.
   "org.tpolecat" %% "doobie-hikari" % "0.6.0", // HikariCP transactor.
   "org.tpolecat" %% "doobie-postgres" % "0.6.0", // Postgres driver 42.2.5 + type mappings.
+
+  "com.h2database" % "h2" % "1.4.197",
   "org.tpolecat" %% "doobie-specs2" % "0.6.0" % "test", // Specs2 support for typechecking statements.
   "org.tpolecat" %% "doobie-scalatest" % "0.6.0" % "test", // ScalaTest support for typechecking statements.
 
   "org.scalaz" %% "scalaz-zio" % "0.3.1",
   "mysql" % "mysql-connector-java" % "8.0.11",
   "org.scalatest" %% "scalatest" % "3.0.4",
-  "com.h2database" % "h2" % "1.4.197"
 )
 
 resolvers ++= Seq(

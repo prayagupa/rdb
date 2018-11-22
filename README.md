@@ -18,9 +18,9 @@ use updupd;
 CREATE TABLE Inventory (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, warehouse VARCHAR(20), sku VARCHAR(20), qty int);
 -- ALTER TABLE Inventory ADD PRIMARY KEY(id);
 
-insert into Inventory VALUES('De Moines', 'sku-1', 88);
-insert into Inventory VALUES('Seattle', 'sku-2', 99);
-insert into Inventory VALUES('Tacoma', 'sku-3', 11);
+insert into Inventory (warehouse, sku, qty) VALUES('De Moines', 'sku-1', 88);
+insert into Inventory (warehouse, sku, qty) VALUES('Seattle', 'sku-2', 99);
+insert into Inventory (warehouse, sku, qty) VALUES('Tacoma', 'sku-3', 11);
 ```
 
 results:
@@ -87,6 +87,14 @@ CREATE SEQUENCE inv_pk START WITH 1;
 CREATE TABLE CustomerOrder (id NUMBER, name VARCHAR(20), active VARCHAR(2), created TIMESTAMP);
 INSERT INTO CustomerOrder VALUES(1, 'steve jobs', '01', CURRENT_TIMESTAMP);
 
+```
+
+```
+aws rds describe-db-instances --profile aws-default --region us-west-2
+
+-- add proper firewall to fix Can't connect to MySQL server on
+
+mysql -h duwamish.<<12>>.us-west-2.rds.amazonaws.com -P 3306 -u root -p
 ```
 
 takes `~200ms` could be because of oracle connection is via on VPN.

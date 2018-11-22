@@ -2,24 +2,21 @@ package cats
 
 import java.util.UUID
 
-import cats.DoobieMySQLExamples.connection
+import cats.implicits._
+import doobie.implicits._
+
 import cats.effect.{ContextShift, IO, Resource}
 import doobie.hikari.HikariTransactor
 import doobie.util.fragment.Fragment
 import doobie.util.transactor.Transactor.Aux
 import doobie.util.update.Update
 import doobie.{ConnectionIO, ExecutionContexts, Transactor}
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.Random
 
-object DoobieMySQLExamples {
-
-  import cats.implicits._
-
-  import doobie.implicits._
-
-  import InventoryApi._
+object Db {
 
   implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.Implicits.global)
 
@@ -53,16 +50,26 @@ object DoobieMySQLExamples {
     user = "root",
     pass = "r00t"
   )
+}
+
+object DoobieMySQLExamples {
+
+  import InventoryApi._
+
+  val logger = LoggerFactory.getLogger(DoobieMySQLExamples.getClass)
 
   def main(args: Array[String]): Unit = {
 
     val program = 41.pure[ConnectionIO]
 
-    val io = program.transact(connection)
+    val io =
+      Db.poolTransactor.use { conn =>
+        program.transact(conn)
+      }
 
     val result = io.unsafeRunSync
 
-    println(result)
+    logger.info("pure " + result)
     //Thread.sleep(10000)
 
     ///
@@ -107,9 +114,12 @@ object DoobieMySQLExamples {
           .update
           .run
 
-      val results = (transaction1, transaction2)
-        .mapN(_ + _)
-        .transact(connection)
+      val results =
+        Db.poolTransactor.use { connection =>
+          (transaction1, transaction2)
+            .mapN(_ + _)
+            .transact(connection)
+        }
         .unsafeToFuture()
 
       import scala.concurrent.duration._
@@ -120,11 +130,12 @@ object DoobieMySQLExamples {
     }
 
     //rollback(ExecutionContext.Implicits.global)
-    InventoryApi.Inventory.batchInsert
+    //InventoryApi.Inventory.batchInsert
   }
 
   def transact[a](f: ConnectionIO[a]): IO[a] = {
-    poolTransactor.use { tr =>
+    logger.info("making transaction: ")
+    Db.poolTransactor.use { tr =>
       f.transact(tr)
     }
   }
@@ -140,12 +151,6 @@ object InventoryApi {
     val sku = "sku"
     val qty = "qty"
 
-    import cats._
-    import cats.implicits._
-
-    import doobie.syntax
-    import doobie.implicits._
-
     //fields can not be interpolated
     private val select = fr"select warehouse, sku, qty"
     private val from = fr"from Inventory"
@@ -154,11 +159,11 @@ object InventoryApi {
       (select ++ from)
         .query[Inventory]
         .to[List]
-        .transact(connection)
+        .transact(Db.connection)
     }
 
     def find = {
-      val yo = connection.yolo
+      val yo = Db.connection.yolo
 
       import yo._
 
@@ -172,7 +177,7 @@ object InventoryApi {
       val stuff = fr"insert into Inventory(warehouse, sku, qty) values($warehouse, $sku, $qty)"
         .update
         .withUniqueGeneratedKeys[Int]("id")
-        .transact(connection)
+        .transact(Db.connection)
         .unsafeToFuture()
 
       stuff
@@ -188,10 +193,12 @@ object InventoryApi {
       )
       val sql = "INSERT INTO Inventory (warehouse, sku, qty) VALUES (?, ?, ?)"
 
-      val resultSet = Update[(String, String, Int)](sql)
-        .updateMany(values)
-        .transact(connection)
-        .unsafeToFuture()
+      val resultSet =
+        Db.poolTransactor.use { conn =>
+          Update[(String, String, Int)](sql)
+            .updateMany(values)
+            .transact(conn)
+        }.unsafeToFuture()
 
       import scala.concurrent.duration._
       val r = Await.result(resultSet, 3 seconds)
@@ -209,17 +216,17 @@ object InventoryApi {
         .update
         .withUniqueGeneratedKeys[Int]("id")
 
-      val lastInserted =
+      val trx = Db.poolTransactor.use { conn =>
         (for {
           _ <- fr"UPDATE Inventory SET warehouse = 'SF new-warehouse' WHERE id=1;".update.run
           insertedId <- fr"INSERT INTO Inventory (warehouse, sku, qty) VALUES('TAC', 'SSSKKKUUU', 'hello');"
             .update
             .withUniqueGeneratedKeys[Int]("id")
         } yield insertedId)
-          .transact(connection)
-          .unsafeRunSync()
+          .transact(conn)
+      }.unsafeRunSync()
 
-      println("lastInserted: " + lastInserted)
+      println("lastInserted: " + trx)
     }
   }
 

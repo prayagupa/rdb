@@ -1,4 +1,5 @@
-import java.sql.Timestamp
+import java.io.FileReader
+import java.sql.{Connection, Driver, DriverManager, Timestamp}
 
 import cats.effect.IO
 import doobie.util.transactor.Transactor
@@ -27,7 +28,7 @@ class InMemoryOracleSpec extends FunSpec {
     println("startup")
     inMemoryServer.start()
 
-    fr"DROP TABLE IF EXISTS CustomerOrder; DROP SEQUENCE CO_PK;"
+    fr"DROP TABLE IF EXISTS CustomerOrder; DROP SEQUENCE IF EXISTS CO_PK;"
       .update
       .run
       .transact(transactor)
@@ -47,25 +48,13 @@ class InMemoryOracleSpec extends FunSpec {
   }
 
   def tearDown = {
-    println("shutdown")
-
-    fr"DROP TABLE CustomerOrder;"
-      .update
-      .run
-      .transact(transactor)
-      .unsafeRunSync()
-
-    inMemoryServer.shutdown()
-  }
-
-  def spec(specText: String)(testFun: => Any) = {
-    setup
-    it(specText)(testFun)
+    inMemoryServer.stop()
   }
 
   final case class CustomerOrder(id: Int, name: String, active: String, created: Timestamp)
 
-  spec("setup and insert") {
+  it("setup and insert") {
+    setup
     val create = fr"INSERT INTO CustomerOrder VALUES(1, 'upd', '01', CURRENT_TIMESTAMP);"
       .update
       .run
@@ -80,6 +69,42 @@ class InMemoryOracleSpec extends FunSpec {
 
     println(get)
 
+    tearDown
+  }
+
+  it("read from sql") {
+    import org.h2.tools.RunScript
+
+    inMemoryServer.start()
+
+    val connection = DriverManager.getConnection(
+      "jdbc:h2:~/inmemory-db;MODE=Oracle",
+      "sa",
+      ""
+    )
+
+    RunScript.execute(connection, new FileReader("db/1.sql"))
+
+    val transactor: Aux[IO, Connection] = Transactor.fromConnection(connection, ex)
+
+    val co = fr"SELECT * FROM CustomerOrder;"
+      .query[CustomerOrder]
+      .to[List]
+      .transact(transactor)
+      .unsafeRunSync()
+
+    println(co)
+
+    val co1 = fr"SELECT * FROM Inventory;"
+      .query[CustomerOrder]
+      .to[List]
+      .transact(transactor)
+      .unsafeRunSync()
+
+    println(co1)
+
+    //cleanup
+    RunScript.execute(connection, new FileReader("db/2.sql"))
     tearDown
   }
 }
