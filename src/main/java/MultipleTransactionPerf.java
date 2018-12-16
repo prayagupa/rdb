@@ -40,7 +40,7 @@ public class MultipleTransactionPerf {
             Connection connection = getDatabaseConnection();
             connection.setAutoCommit(true);
 
-            String compiledQuery = "INSERT INTO CUSTOMER1(id, name, address, loyalty_point, username)" +
+            var compiledQuery = "INSERT INTO CUSTOMER(id, name, address, loyalty_point, username)" +
                     " VALUES" + "(?, ?, ?, ?, ?)";
             preparedStatement = connection.prepareStatement(compiledQuery);
 
@@ -93,6 +93,6 @@ public class MultipleTransactionPerf {
     }
 
     public static void main(String[] args) {
-        writeWithCompileQuery(1000);
+        writeWithCompileQuery(10000);
     }
 }

@@ -77,6 +77,6 @@ public class SingleBatchTransactionPerf {
     }
 
     public static void main(String[] args) {
-        writeInABatchWithCompiledQuery(1000);
+        writeInABatchWithCompiledQuery(10000);
     }
 }
