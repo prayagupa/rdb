@@ -80,6 +80,14 @@ select * from v$version;
 "CORE	12.1.0.2.0	Production"
 
 
+CREATE TABLE customer (
+    id NUMBER(10) NOT NULL, 
+    name VARCHAR(130), 
+    address VARCHAR(130), 
+    loyalty_point NUMBER(10), 
+    username VARCHAR(130)
+);
+
 CREATE TABLE Inventory (id NUMBER(10) NOT NULL, warehouse VARCHAR(20), sku VARCHAR(20), qty NUMBER(10));
 ALTER TABLE Inventory ADD (CONSTRAINT inv_pk PRIMARY KEY (ID));
 CREATE SEQUENCE inv_pk START WITH 1;
