@@ -5,25 +5,11 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 /**
- * CREATE TABLE customer (
- * id NUMBER(10) NOT NULL,
- * name VARCHAR(20),
- * address VARCHAR(40),
- * loyalty_point NUMBER(10),
- * username VARCHAR(50)
- * );
- * <p>
- * total time taken = 2251 ms
- * avg total time taken = 2 ms
- *
- * for 140 size
- * total time taken = 2181 ms
- * avg total time taken = 2 ms
- *
- * total time taken = 2306 ms
- * avg total time taken = 2 ms
+ * 3 cols with size around ~125bytes
+ * total time taken to insert the batch = 31 ms
+ * total time taken = 0 s
  */
-public class Perf {
+public class SingleBatchTransactionPerf {
 
     private static Connection getDatabaseConnection() throws SQLException {
         return DriverManager.getConnection(
@@ -33,66 +19,64 @@ public class Perf {
         );
     }
 
-    private static int writeWithCompileQuery(int records) {
-        PreparedStatement statement;
+    public static int[] writeInABatchWithCompiledQuery(int records) {
+        PreparedStatement preparedStatement;
 
         try {
             Connection connection = getDatabaseConnection();
             connection.setAutoCommit(true);
 
-            String compiledQuery = "INSERT INTO CUSTOMER1(id, name, address, loyalty_point, username)" +
+            var compiledQuery = "INSERT INTO customer(id, name, address, loyalty_point, username)" +
                     " VALUES" + "(?, ?, ?, ?, ?)";
-            statement = connection.prepareStatement(compiledQuery);
+            preparedStatement = connection.prepareStatement(compiledQuery);
 
-            long start = System.currentTimeMillis();
-
-            for (int index = 1; index < records; index++) {
-                statement.setInt(1, index);
-                statement.setString(2,
+            for(var index = 1; index <= records; index++) {
+                preparedStatement.setInt(1, index);
+                preparedStatement.setString(2,
                         "customer name -" +
                                 UUID.randomUUID().toString() + ":" +
                                 UUID.randomUUID().toString() + ":" +
                                 UUID.randomUUID().toString()
                 );
-                statement.setString(3,
+                preparedStatement.setString(3,
                         "address - " +
                                 UUID.randomUUID().toString() + ":" +
                                 UUID.randomUUID().toString() + ":" +
                                 UUID.randomUUID().toString()
                 );
-                statement.setInt(4, index);
-                statement.setString(5,
+                preparedStatement.setInt(4, index);
+                preparedStatement.setString(5,
                         "username-" +
                                 UUID.randomUUID().toString() + ":" +
                                 UUID.randomUUID().toString() + ":" +
                                 UUID.randomUUID().toString()
                 );
-
-                long startInternal = System.currentTimeMillis();
-                var inserted = statement.executeUpdate();
-                System.out.println("each transaction time taken = " + (System.currentTimeMillis() - startInternal) + " ms");
+                preparedStatement.addBatch();
             }
 
-            long end = System.currentTimeMillis();
-            System.out.println("total time taken = " + (end - start) + " ms");
-            System.out.println("avg total time taken = " + (end - start) / records + " ms");
+            var start = System.currentTimeMillis();
+            int[] inserted = preparedStatement.executeBatch();
+            var end = System.currentTimeMillis();
 
-            statement.close();
+            System.out.println("total time taken to insert the batch = " + (end - start) + " ms");
+            System.out.println("total time taken = " + (end - start)/records + " s");
+
+            preparedStatement.close();
             connection.close();
 
-            return records;
+            return inserted;
+
         } catch (SQLException ex) {
-            System.err.println("SQLException information: ");
+            System.err.println("SQLException information");
             while (ex != null) {
                 System.err.println("Error msg: " + ex.getMessage());
                 ex = ex.getNextException();
             }
-
-            return 0;
+            throw new RuntimeException("Error");
         }
     }
 
     public static void main(String[] args) {
-        writeWithCompileQuery(1000);
+        writeInABatchWithCompiledQuery(1000);
     }
 }
