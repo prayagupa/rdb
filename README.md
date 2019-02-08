@@ -66,7 +66,7 @@ CREATE TABLE Config(
 [oracle 12 db]()
 ------
 
-```
+```bash
 -- https://github.com/MaksymBilenko/docker-oracle-apex
 -- sudo mkdir -p /data/oracle
 
@@ -79,6 +79,14 @@ SYSTEM@oracle
 select * from v$version;
 "CORE	12.1.0.2.0	Production"
 
+/*create user*/
+create user duwamish identified by duwamish;
+grant connect, resource, dba to duwamish;
+grant create session to duwamish with admin option;
+grant unlimited tablespace to duwamish;
+
+/**/
+select * from dba_profiles; 
 
 CREATE TABLE customer (
     id NUMBER(10) NOT NULL, 
@@ -97,10 +105,11 @@ INSERT INTO CustomerOrder VALUES(1, 'steve jobs', '01', CURRENT_TIMESTAMP);
 
 ```
 
-```
+```bash
 aws rds describe-db-instances --profile aws-default --region us-west-2
 
 -- add proper firewall to fix Can't connect to MySQL server on
+-- also make sure VPN is not screwing up things
 
 mysql -h duwamish.<<12>>.us-west-2.rds.amazonaws.com -P 3306 -u root -p
 ```
