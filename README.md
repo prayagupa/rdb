@@ -69,9 +69,69 @@ CREATE TABLE Config(
 ```bash
 -- https://github.com/MaksymBilenko/docker-oracle-apex
 -- sudo mkdir -p /data/oracle
+-- share /data folder with docker for mounting
 
-docker pull sath89/oracle-12c
-docker run -d -p 8080:8080 -p 1521:1521 sath89/oracle-12c
+# docker pull sath89/oracle-12c
+# docker run -d -p 8080:8080 -p 1521:1521 sath89/oracle-12c
+
+# git clone https://github.com/oracle/docker-images.git
+$ ll OracleDatabase/SingleInstance/dockerfiles/12.2.0.1/
+total 6747696
+-rw-r--r--  1 a1353612  184630988          62 Feb 22 15:31 Checksum.ee
+-rw-r--r--  1 a1353612  184630988          62 Feb 22 15:31 Checksum.se2
+-rw-r--r--  1 a1353612  184630988        3462 Feb 22 15:31 Dockerfile
+-rwxr-xr-x  1 a1353612  184630988        1050 Feb 22 15:31 checkDBStatus.sh
+-rwxr-xr-x  1 a1353612  184630988         905 Feb 22 15:31 checkSpace.sh
+-rwxr-xr-x  1 a1353612  184630988        2953 Feb 22 15:31 createDB.sh
+-rw-r--r--  1 a1353612  184630988        6878 Feb 22 15:31 db_inst.rsp
+-rw-r--r--  1 a1353612  184630988        9204 Feb 22 15:31 dbca.rsp.tmpl
+-rwxr-xr-x  1 a1353612  184630988        2495 Feb 22 15:31 installDBBinaries.sh
+-rw-r--r--@ 1 a1353612  184630988  3453696911 Feb 22 15:58 linuxx64_12201_database.zip
+-rwxr-xr-x  1 a1353612  184630988        6526 Feb 22 15:31 runOracle.sh
+-rwxr-xr-x  1 a1353612  184630988        1015 Feb 22 15:31 runUserScripts.sh
+-rwxr-xr-x  1 a1353612  184630988         758 Feb 22 15:31 setPassword.sh
+-rwxr-xr-x  1 a1353612  184630988         941 Feb 22 15:31 setupLinuxEnv.sh
+-rwxr-xr-x  1 a1353612  184630988         678 Feb 22 15:31 startDB.sh
+
+
+cd OracleDatabase/SingleInstance/dockerfiles
+./buildDockerImage.sh -v 12.2.0.1 -e
+
+$ docker images
+REPOSITORY                                                             TAG                            IMAGE ID            CREATED             SIZE
+oracle/database                                                        12.2.0.1-ee                    bcb7c9f64985        32 hours ago        6.11GB
+oraclelinux                                                            7-slim                         c3d869388183        5 weeks ago         117MB
+
+docker run --name oracle \                                                                                                                             
+-p 1521:1521 -p 5500:5500 \                                                                            
+-e ORACLE_SID=xe \                                                                                     
+-e ORACLE_PDB=duwamish \                                                                               
+-e ORACLE_PWD=Duwamish9 \                                                                                
+-e ORACLE_CHARACTERSET=AL32UTF8 \                                                                      
+-v /data/oracle:/opt/oracle/oradata \                                                                           
+oracle/database:12.2.0.1-ee 
+
+[oracle@7156661d8155 ~]$ echo $ORACLE_HOME/
+/opt/oracle/product/12.2.0.1/dbhome_1/
+
+[oracle@7156661d8155 ~]$ ls -l /opt/oracle/
+total 72
+drwxr-x--- 3 oracle oinstall 4096 Feb 23 19:41 admin
+drwxr-x--- 2 oracle oinstall 4096 Feb 23 19:41 audit
+drwxr-x--- 4 oracle oinstall 4096 Feb 23 19:45 cfgtoollogs
+-rwxr-xr-x 1 oracle dba      1050 Feb 22 23:31 checkDBStatus.sh
+drwxr-xr-x 2 oracle dba      4096 Feb 23 00:22 checkpoints
+-rwxr-xr-x 1 oracle dba      2953 Feb 22 23:31 createDB.sh
+-rw-r--r-- 1 oracle dba      9204 Feb 22 23:31 dbca.rsp.tmpl
+drwxrwxr-x 1 oracle dba      4096 Feb 23 00:22 diag
+drwxrwx--- 1 oracle dba      4096 Feb 23 00:22 oraInventory
+drwxrwxrwx 4 oracle oinstall  128 Feb 23 19:41 oradata
+drwxr-xr-x 1 oracle dba      4096 Feb 23 00:15 product
+-rwxr-xr-x 1 oracle dba      6526 Feb 22 23:31 runOracle.sh
+-rwxr-xr-x 1 oracle dba      1015 Feb 22 23:31 runUserScripts.sh
+drwxr-xr-x 1 oracle dba      4096 Feb 23 00:15 scripts
+-rwxr-xr-x 1 oracle dba       758 Feb 22 23:31 setPassword.sh
+-rwxr-xr-x 1 oracle dba       678 Feb 22 23:31 startDB.sh
 
 sqlplus system/oracle@//localhost:1521/xe
 SYSTEM@oracle
