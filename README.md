@@ -3,12 +3,12 @@ database requests perf
 
 **start [db/mysql](https://hub.docker.com/_/mysql/)**
 
-```
+```bash
 docker-compose up
 ```
 
 
-```
+```bash
 docker exec -it 0cad383c1249 mysql -u root -p
 #mysql -u root -p
 
@@ -45,7 +45,7 @@ note there is cost of creating connection at run time as well.
   ================ Individual ==========================
 ```
 
-```
+```mysql-sql
 CREATE TABLE Config(
         config_id INTEGER AUTO_INCREMENT PRIMARY KEY,
         config_uuid VARCHAR(64) NOT NULL,
@@ -63,16 +63,16 @@ CREATE TABLE Config(
 );
 ```
 
-[oracle 12 db]()
+[oracle 12 db](https://docs.oracle.com/database/121/CNCPT/intro.htm#CNCPT001)
 ------
 
-```bash
--- https://github.com/MaksymBilenko/docker-oracle-apex
--- sudo mkdir -p /data/oracle
--- share /data folder with docker for mounting
+https://www.oracle.com/database/technologies/rac.html
 
-# docker pull sath89/oracle-12c
-# docker run -d -p 8080:8080 -p 1521:1521 sath89/oracle-12c
+```bash
+sudo mkdir -p /data/oracle
+sudo chmod 777 -R /data
+
+## share /data folder with docker for mounting
 
 # git clone https://github.com/oracle/docker-images.git
 $ ll OracleDatabase/SingleInstance/dockerfiles/12.2.0.1/
@@ -109,7 +109,12 @@ docker run --name oracle \
 -e ORACLE_PWD=Duwamish9 \                                                                                
 -e ORACLE_CHARACTERSET=AL32UTF8 \                                                                      
 -v /data/oracle:/opt/oracle/oradata \                                                                           
-oracle/database:12.2.0.1-ee 
+oracle/database:12.2.0.1-ee
+
+## SecureShell into oracle container
+[oracle@6be299c2c700 ~]$ ps aux | grep oracle
+oracle       1  0.0  0.1  11696  2472 ?        Ss   08:35   0:00 /bin/bash /opt/oracle/runOracle.sh
+oracle      26  0.0  0.5 215296 11012 ?        Ssl  08:35   0:00 /opt/oracle/product/12.2.0.1/dbhome_1/bin/tnslsnr LISTENER -inherit
 
 [oracle@7156661d8155 ~]$ echo $ORACLE_HOME/
 /opt/oracle/product/12.2.0.1/dbhome_1/
@@ -133,9 +138,10 @@ drwxr-xr-x 1 oracle dba      4096 Feb 23 00:15 scripts
 -rwxr-xr-x 1 oracle dba       758 Feb 22 23:31 setPassword.sh
 -rwxr-xr-x 1 oracle dba       678 Feb 22 23:31 startDB.sh
 
-sqlplus sys/Duwamish9@//localhost:1521/XE as sysdba
-sqlplus system/oracle@//localhost:1521/xe
-SYSTEM@oracle
+[oracle@6be299c2c700 ~]$ ls -l /docker-entrypoint-initdb.d
+lrwxrwxrwx 1 root root 19 Feb 23 00:15 /docker-entrypoint-initdb.d -> /opt/oracle/scripts
+
+sqlplus sys/Duwamish9@//localhost:1521/XE as sysdba ## sqlplus system/oracle@//localhost:1521/xe
 
 select * from v$version;
 "CORE	12.1.0.2.0	Production"
@@ -165,6 +171,10 @@ CREATE SEQUENCE inv_pk START WITH 1;
 
 CREATE TABLE CustomerOrder (id NUMBER, name VARCHAR(20), active VARCHAR(2), created TIMESTAMP);
 INSERT INTO CustomerOrder VALUES(1, 'steve jobs', '01', CURRENT_TIMESTAMP);
+
+##
+# docker pull sath89/oracle-12c
+# docker run -d -p 8080:8080 -p 1521:1521 sath89/oracle-12c
 
 ```
 

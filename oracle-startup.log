@@ -1,0 +1,93 @@
+ORACLE PASSWORD FOR SYS, SYSTEM AND PDBADMIN: Duwamish9
+
+LSNRCTL for Linux: Version 12.2.0.1.0 - Production on 24-FEB-2019 08:35:14
+
+Copyright (c) 1991, 2016, Oracle.  All rights reserved.
+
+Starting /opt/oracle/product/12.2.0.1/dbhome_1/bin/tnslsnr: please wait...
+
+TNSLSNR for Linux: Version 12.2.0.1.0 - Production
+System parameter file is /opt/oracle/product/12.2.0.1/dbhome_1/network/admin/listener.ora
+Log messages written to /opt/oracle/diag/tnslsnr/6be299c2c700/listener/alert/log.xml
+Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1)))
+Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=0.0.0.0)(PORT=1521)))
+
+Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1)))
+STATUS of the LISTENER
+------------------------
+Alias                     LISTENER
+Version                   TNSLSNR for Linux: Version 12.2.0.1.0 - Production
+Start Date                24-FEB-2019 08:35:14
+Uptime                    0 days 0 hr. 0 min. 0 sec
+Trace Level               off
+Security                  ON: Local OS Authentication
+SNMP                      OFF
+Listener Parameter File   /opt/oracle/product/12.2.0.1/dbhome_1/network/admin/listener.ora
+Listener Log File         /opt/oracle/diag/tnslsnr/6be299c2c700/listener/alert/log.xml
+Listening Endpoints Summary...
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1)))
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=0.0.0.0)(PORT=1521)))
+The listener supports no services
+The command completed successfully
+[WARNING] [DBT-11209] Current available physical memory is less than the required physical memory (2,048MB) for creating the database.
+[WARNING] [DBT-10102] The listener configuration is not selected for the database. EM DB Express URL will not be accessible.
+   CAUSE: The database should be registered with a listener in order to access the EM DB Express URL.
+   ACTION: Select a listener to be registered or created with the database.
+
+Copying database files
+1% complete
+
+13% complete
+25% complete
+Creating and starting Oracle instance
+26% complete
+30% complete
+31% complete
+35% complete
+38% complete
+39% complete
+41% complete
+Completing Database Creation
+42% complete
+43% complete
+44% complete
+46% complete
+47% complete
+50% complete
+Creating Pluggable Databases
+55% complete
+75% complete
+Executing Post Configuration Actions
+100% complete
+Look at the log file "/opt/oracle/cfgtoollogs/dbca/XE/XE.log" for further details.
+
+SQL*Plus: Release 12.2.0.1.0 Production on Sun Feb 24 08:43:31 2019
+
+Copyright (c) 1982, 2016, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
+
+SQL> 
+System altered.
+
+SQL> 
+Pluggable database altered.
+
+SQL> Disconnected from Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
+The Oracle base remains unchanged with value /opt/oracle
+#########################
+DATABASE IS READY TO USE!
+#########################
+The following output is now a tail of the alert.log:
+Completed: alter pluggable database DUWAMISH open
+2019-02-24T08:43:30.503944+00:00
+DUWAMISH(3):CREATE SMALLFILE TABLESPACE "USERS" LOGGING  DATAFILE  '/opt/oracle/oradata/XE/DUWAMISH/users01.dbf' SIZE 5M REUSE AUTOEXTEND ON NEXT  1280K MAXSIZE UNLIMITED  EXTENT MANAGEMENT LOCAL  SEGMENT SPACE MANAGEMENT  AUTO
+DUWAMISH(3):Completed: CREATE SMALLFILE TABLESPACE "USERS" LOGGING  DATAFILE  '/opt/oracle/oradata/XE/DUWAMISH/users01.dbf' SIZE 5M REUSE AUTOEXTEND ON NEXT  1280K MAXSIZE UNLIMITED  EXTENT MANAGEMENT LOCAL  SEGMENT SPACE MANAGEMENT  AUTO
+DUWAMISH(3):ALTER DATABASE DEFAULT TABLESPACE "USERS"
+DUWAMISH(3):Completed: ALTER DATABASE DEFAULT TABLESPACE "USERS"
+2019-02-24T08:43:31.875541+00:00
+ALTER SYSTEM SET control_files='/opt/oracle/oradata/XE/control01.ctl' SCOPE=SPFILE;
+   ALTER PLUGGABLE DATABASE DUWAMISH SAVE STATE
+Completed:    ALTER PLUGGABLE DATABASE DUWAMISH SAVE STATE

@@ -17,12 +17,17 @@ services:
       #    ports:
       #      - 8080:8080
       #
-  
-  oracledb:
-     image: sath89/oracle-12c
-     ports:
-       - 1521:1521
-     volumes:
-     #       - /Volumes/oracle:/u01/app/oracle
-             - ./db:/docker-entrypoint-initdb.d
 
+  oracledb:
+    image: oracle/database:12.2.0.1-ee
+    ports:
+    - 1521:1521
+    - 5500:5500
+    environment:
+    - ORACLE_SID:xe
+    - ORACLE_PDB=duwamish
+    - ORACLE_PWD=Duwamish9
+    - ORACLE_CHARACTERSET=AL32UTF8
+    volumes:
+    - /data/oracle:/opt/oracle/oradata
+    - ./db:/docker-entrypoint-initdb.d/setup
