@@ -133,11 +133,14 @@ drwxr-xr-x 1 oracle dba      4096 Feb 23 00:15 scripts
 -rwxr-xr-x 1 oracle dba       758 Feb 22 23:31 setPassword.sh
 -rwxr-xr-x 1 oracle dba       678 Feb 22 23:31 startDB.sh
 
+sqlplus sys/Duwamish9@//localhost:1521/XE as sysdba
 sqlplus system/oracle@//localhost:1521/xe
 SYSTEM@oracle
 
 select * from v$version;
 "CORE	12.1.0.2.0	Production"
+
+SELECT owner, table_name FROM dba_tables;
 
 /*create user*/
 create user duwamish identified by duwamish;

@@ -26,8 +26,8 @@ object DoobieOracleExamples {
   val transactor: Aux[IO, Unit] = Transactor.fromDriverManager[IO](
     "oracle.jdbc.driver.OracleDriver",
     "jdbc:oracle:thin:@localhost:1521/xe",
-    "SYSTEM",
-    "oracle"
+    "SYS as SYSDBA",
+    "Duwamish9"
   )
 
   case class DbBoolean(boolean: Boolean)
