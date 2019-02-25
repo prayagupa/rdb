@@ -66,7 +66,9 @@ CREATE TABLE Config(
 [oracle 12 db](https://docs.oracle.com/database/121/CNCPT/intro.htm#CNCPT001)
 ------
 
-https://www.oracle.com/database/technologies/rac.html
+- https://www.oracle.com/database/technologies/rac.html
+- https://aws.amazon.com/blogs/database/amazon-aurora-as-an-alternative-to-oracle-rac/
+- https://docs.oracle.com/cd/E18283_01/server.112/e17110/bgprocesses.htm
 
 ```bash
 sudo mkdir -p /data/oracle
@@ -105,7 +107,7 @@ oraclelinux                                                            7-slim   
 docker run --name oracle \                                                                                                                             
 -p 1521:1521 -p 5500:5500 \                                                                            
 -e ORACLE_SID=xe \                                                                                     
--e ORACLE_PDB=duwamish \                                                                               
+-e ORACLE_PDB=duwamishpdb \                                                                               
 -e ORACLE_PWD=Duwamish9 \                                                                                
 -e ORACLE_CHARACTERSET=AL32UTF8 \                                                                      
 -v /data/oracle:/opt/oracle/oradata \                                                                           
@@ -141,18 +143,113 @@ drwxr-xr-x 1 oracle dba      4096 Feb 23 00:15 scripts
 [oracle@6be299c2c700 ~]$ ls -l /docker-entrypoint-initdb.d
 lrwxrwxrwx 1 root root 19 Feb 23 00:15 /docker-entrypoint-initdb.d -> /opt/oracle/scripts
 
-sqlplus sys/Duwamish9@//localhost:1521/XE as sysdba ## sqlplus system/oracle@//localhost:1521/xe
+sqlplus duwamish/Duwamish9@//localhost:1521/ORCLCDB as sysdba ## sqlplus system/oracle@//localhost:1521/xe
+SQL> connect sys/Duwamish9@localhost:1521/ORCLCDB
 
 select * from v$version;
 "CORE	12.1.0.2.0	Production"
 
 SELECT owner, table_name FROM dba_tables;
 
-/*create user*/
-create user duwamish identified by duwamish;
-grant connect, resource, dba to duwamish;
-grant create session to duwamish with admin option;
-grant unlimited tablespace to duwamish;
+[oracle@99de476b8016 ~]$ lsnrctl 
+
+LSNRCTL for Linux: Version 12.2.0.1.0 - Production on 25-FEB-2019 01:58:43
+
+Copyright (c) 1991, 2016, Oracle.  All rights reserved.
+
+Welcome to LSNRCTL, type "help" for information.
+
+LSNRCTL> help
+The following operations are available
+An asterisk (*) denotes a modifier or extended command:
+
+start           stop            status          services        
+servacls        version         reload          save_config     
+trace           spawn           quit            exit            
+set*            show*           
+
+LSNRCTL> status
+Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1)))
+STATUS of the LISTENER
+------------------------
+Alias                     LISTENER
+Version                   TNSLSNR for Linux: Version 12.2.0.1.0 - Production
+Start Date                25-FEB-2019 01:46:12
+Uptime                    0 days 0 hr. 12 min. 42 sec
+Trace Level               off
+Security                  ON: Local OS Authentication
+SNMP                      OFF
+Listener Parameter File   /opt/oracle/product/12.2.0.1/dbhome_1/network/admin/listener.ora
+Listener Log File         /opt/oracle/diag/tnslsnr/99de476b8016/listener/alert/log.xml
+Listening Endpoints Summary...
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1)))
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=0.0.0.0)(PORT=1521)))
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=tcps)(HOST=99de476b8016)(PORT=5500))(Security=(my_wallet_directory=/opt/oracle/admin/ORCLCDB/xdb_wallet))(Presentation=HTTP)(Session=RAW))
+Services Summary...
+Service "82af308615e70949e053020012aca602" has 1 instance(s).
+  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
+Service "ORCLCDB" has 1 instance(s).
+  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
+Service "ORCLCDBXDB" has 1 instance(s).
+  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
+Service "duwamish" has 1 instance(s).
+  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
+The command completed successfully
+
+LSNRCTL> services
+Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1)))
+Services Summary...
+Service "82af308615e70949e053020012aca602" has 1 instance(s).
+  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
+    Handler(s):
+      "DEDICATED" established:0 refused:0 state:ready
+         LOCAL SERVER
+Service "ORCLCDB" has 1 instance(s).
+  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
+    Handler(s):
+      "DEDICATED" established:0 refused:0 state:ready
+         LOCAL SERVER
+Service "ORCLCDBXDB" has 1 instance(s).
+  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
+    Handler(s):
+      "D000" established:0 refused:0 current:0 max:1022 state:ready
+         DISPATCHER <machine: 99de476b8016, pid: 2169>
+         (ADDRESS=(PROTOCOL=tcp)(HOST=99de476b8016)(PORT=39203))
+Service "duwamish" has 1 instance(s).
+  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
+    Handler(s):
+      "DEDICATED" established:0 refused:0 state:ready
+         LOCAL SERVER
+The command completed successfully
+
+
+[oracle@99de476b8016 ~]$ cat /opt/oracle/product/12.2.0.1/dbhome_1/network/admin/listener.ora 
+LISTENER = 
+(DESCRIPTION_LIST = 
+  (DESCRIPTION = 
+    (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC1)) 
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521)) 
+  ) 
+) 
+
+DEDICATED_THROUGH_BROKER_LISTENER=ON
+DIAG_ADR_ENABLED = off
+
+
+[oracle@99de476b8016 ~]$ cat /opt/oracle/product/12.2.0.1/dbhome_1/network/admin/tnsnames.ora 
+ORCLCDB=localhost:1521/ORCLCDB
+DUWAMISHPDB= 
+(DESCRIPTION = 
+  (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+  (CONNECT_DATA =
+    (SERVER = DEDICATED)
+    (SERVICE_NAME = DUWAMISHPDB)
+  )
+)
+```
+
+```sql
+/*create user: sql file*/
 
 /**/
 select * from dba_profiles; 

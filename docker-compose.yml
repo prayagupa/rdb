@@ -25,7 +25,7 @@ services:
     - 5500:5500
     environment:
     - ORACLE_SID:xe
-    - ORACLE_PDB=duwamish
+    - ORACLE_PDB=duwamishpdb
     - ORACLE_PWD=Duwamish9
     - ORACLE_CHARACTERSET=AL32UTF8
     volumes:
