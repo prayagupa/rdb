@@ -24,19 +24,19 @@ object OracleSqlExecutor extends App {
   import Db._
 
   def getConnection(url: String, username: String, password: String): IO[Throwable, Connection] =
-    IO.sync(DriverManager.getConnection(url, username, password))
+    IO.succeed(DriverManager.getConnection(url, username, password))
 
   def createStatement(connection: Connection): IO[Throwable, Statement] =
-    IO.sync(connection.createStatement())
+    IO.succeed(connection.createStatement())
 
   def selectAll(query: String)(statement: Statement): IO[Throwable, ResultSet] =
-    IO.sync(statement.executeQuery(query))
+    IO.succeed(statement.executeQuery(query))
 
-  def run(args: List[String]): IO[Nothing, ExitStatus] =
-    program.attempt.map(_.fold(_ => 1, _ => 0)).map(ExitStatus.ExitNow(_))
+  def run(args: List[String]) =
+    program.fold(_ => 1, _ => 0)
 
   def asResult[a: TypeTag](rs: ResultSet): IO[Throwable, List[List[String]]] =
-    IO.sync {
+    IO.succeed {
       val numberOfCols = rs.getMetaData.getColumnCount
 
       var results = ListBuffer[List[String]]()
@@ -63,7 +63,7 @@ object OracleSqlExecutor extends App {
       createStatement(conn).flatMap { st =>
         selectAll("select active from CustomerOrder")(st).flatMap { rs =>
           asResult[a](rs).flatMap { r =>
-            IO.sync {
+            IO.succeed {
               println(r)
               r
             }

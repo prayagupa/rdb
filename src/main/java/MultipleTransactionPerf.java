@@ -40,7 +40,7 @@ public class MultipleTransactionPerf {
             Connection connection = getDatabaseConnection();
             connection.setAutoCommit(true);
 
-            var compiledQuery = "INSERT INTO CUSTOMER(id, name, address, loyalty_point, username)" +
+            String compiledQuery = "INSERT INTO CUSTOMER(id, name, address, loyalty_point, username)" +
                     " VALUES" + "(?, ?, ?, ?, ?)";
             preparedStatement = connection.prepareStatement(compiledQuery);
 
@@ -69,7 +69,7 @@ public class MultipleTransactionPerf {
                 );
 
                 long startInternal = System.currentTimeMillis();
-                var inserted = preparedStatement.executeUpdate();
+                long inserted = preparedStatement.executeUpdate();
                 System.out.println("each transaction time taken = " + (System.currentTimeMillis() - startInternal) + " ms");
             }
 

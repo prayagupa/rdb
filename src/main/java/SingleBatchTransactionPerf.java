@@ -26,11 +26,11 @@ public class SingleBatchTransactionPerf {
             Connection connection = getDatabaseConnection();
             connection.setAutoCommit(true);
 
-            var compiledQuery = "INSERT INTO customer(id, name, address, loyalty_point, username)" +
+            String compiledQuery = "INSERT INTO customer(id, name, address, loyalty_point, username)" +
                     " VALUES" + "(?, ?, ?, ?, ?)";
             preparedStatement = connection.prepareStatement(compiledQuery);
 
-            for(var index = 1; index <= records; index++) {
+            for(int index = 1; index <= records; index++) {
                 preparedStatement.setInt(1, index);
                 preparedStatement.setString(2,
                         "customer name -" +
@@ -54,9 +54,9 @@ public class SingleBatchTransactionPerf {
                 preparedStatement.addBatch();
             }
 
-            var start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
             int[] inserted = preparedStatement.executeBatch();
-            var end = System.currentTimeMillis();
+            long end = System.currentTimeMillis();
 
             System.out.println("total time taken to insert the batch = " + (end - start) + " ms");
             System.out.println("total time taken = " + (end - start)/records + " s");

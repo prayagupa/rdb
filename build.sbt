@@ -28,7 +28,7 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-specs2" % DoobieVersion % "test", // Specs2 support for typechecking statements.
   "org.tpolecat" %% "doobie-scalatest" % DoobieVersion % "test", // ScalaTest support for typechecking statements.
 
-  "org.scalaz" %% "scalaz-zio" % "0.5.3",
+  "org.scalaz" %% "scalaz-zio" % "0.19",
 
   "mysql" % "mysql-connector-java" % "8.0.11",
   "org.scalatest" %% "scalatest" % "3.0.4",
