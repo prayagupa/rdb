@@ -1,4 +1,4 @@
-package zio
+package io_eff
 
 import java.sql.{Connection, DriverManager}
 

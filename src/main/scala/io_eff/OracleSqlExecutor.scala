@@ -1,9 +1,8 @@
-package zio
+package io_eff
 
 import java.sql.{Connection, DriverManager, ResultSet, Statement}
 
-import scalaz.zio.{App, IO}
-import scalaz.zio.console._
+import zio.{App, IO}
 
 import scala.collection.immutable
 import scala.collection.mutable.ListBuffer
@@ -18,8 +17,7 @@ object OracleSqlExecutor extends App {
     val password = "oracle"
   }
 
-  import scalaz._
-  import scalaz.zio._
+  import zio._
 
   import Db._
 

@@ -4,7 +4,7 @@ import java.util.TimeZone
 
 object RawOracleSqlExeccutor {
 
-  import zio.OracleSqlExecutor.Db._
+  import io_eff.OracleSqlExecutor.Db._
 
   val sharedConn: Connection = DriverManager.getConnection(url, username, password)
 
