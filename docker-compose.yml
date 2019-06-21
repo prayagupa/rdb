@@ -7,7 +7,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
-      - 3306:3306
+    - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: r00t
 
@@ -24,10 +24,21 @@ services:
     - 1521:1521
     - 5500:5500
     environment:
-    - ORACLE_SID:xe
+    - ORACLE_SID=xe
     - ORACLE_PDB=duwamishpdb
     - ORACLE_PWD=Duwamish9
     - ORACLE_CHARACTERSET=AL32UTF8
     volumes:
     - /data/oracle:/opt/oracle/oradata
     - ./db:/docker-entrypoint-initdb.d/setup
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: root
+    volumes:
+#      - /data/postgres:/var/lib/postgresql/data/pgdata
+      - ./db/pg:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432

@@ -1,8 +1,11 @@
-import java.sql.{Connection, DriverManager, ResultSet}
+import java.sql.{Connection, DriverManager, ResultSet, Timestamp}
+import java.time.{Instant, OffsetDateTime, ZoneId, ZoneOffset}
+import java.util.TimeZone
 
 object RawOracleSqlExeccutor {
 
   import zio.OracleSqlExecutor.Db._
+
   val sharedConn: Connection = DriverManager.getConnection(url, username, password)
 
   def main(args: Array[String]): Unit = {
@@ -81,6 +84,40 @@ object RawOracleSqlExeccutor {
       println(s"time taken: ${time}ms")
     }
 
-    read(List.empty)
+    def dateExample: Unit = {
+      val tz = ZoneId.of("America/Los_Angeles")
+
+      val now2 = Timestamp.from(OffsetDateTime.now(ZoneOffset.UTC).toInstant)
+      val now = Timestamp.from(Instant.now())
+
+      val y = now2.toLocalDateTime
+      //val statement = sharedConn.createStatement
+      //val r = statement.executeUpdate(s"INSERT INTO CustomerOrder VALUES(2, 'Porcupine Tree', '01', '$date', 'dd-Mon-yy hh.mm.ss.zzz')")
+
+      //select TO_CHAR(TO_DATE('01-MAR-19 12.05.19.922613 AM', 'yy hh.mm.ss')) from dual;
+
+      val sql1 = s"INSERT INTO CustomerOrder (id, name, active, created) VALUES(?, ?, ?, ?)"
+      val statement1 = sharedConn.prepareStatement(sql1)
+      statement1.setInt(1, 4)
+      statement1.setString(2, "PT")
+      statement1.setString(3, "01")
+      statement1.setTimestamp(4, now2)
+      statement1.executeQuery()
+
+      val s2 = sharedConn.createStatement()
+      val r2 = s2.executeQuery("SELECT created FROM CustomerOrder")
+
+      while (r2.next()) {
+        println(r2.getTimestamp("created"))
+      }
+
+      sharedConn.close()
+    }
+
+    //read(List.empty)
+    dateExample
+
   }
+
+  //select  TO_CHAR(TO_DATE('01-03-2010', 'dd-mm-yyyy')) from dual;
 }

@@ -1,6 +1,7 @@
 package cats
 
 import java.sql.Timestamp
+import java.time.OffsetDateTime
 
 import cats.effect.{ContextShift, IO}
 import doobie.Transactor
@@ -114,5 +115,11 @@ object DoobieOracleExamples {
   def transaction[a](tx: ConnectionIO[a]): IO[a] = {
     tx.transact(transactor)
   }
+
+  val date: OffsetDateTime = OffsetDateTime.now()
+//
+//  fr"INSERT INTO CustomerOrder VALUES(2, 'Porcupine Tree', '01', $date);"
+//    .update
+//    .run
 
 }
