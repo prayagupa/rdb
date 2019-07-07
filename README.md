@@ -1,26 +1,18 @@
 
 database requests perf
 
-**start [db/mysql](https://hub.docker.com/_/mysql/)**
+**[db/mysql](https://hub.docker.com/_/mysql/)**
+---
 
 ```bash
 docker-compose up
 ```
 
-
 ```bash
 docker exec -it 0cad383c1249 mysql -u root -p
 #mysql -u root -p
 
-create database updupd;
-use updupd;
-
-CREATE TABLE Inventory (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, warehouse VARCHAR(20), sku VARCHAR(20), qty int);
--- ALTER TABLE Inventory ADD PRIMARY KEY(id);
-
-insert into Inventory (warehouse, sku, qty) VALUES('De Moines', 'sku-1', 88);
-insert into Inventory (warehouse, sku, qty) VALUES('Seattle', 'sku-2', 99);
-insert into Inventory (warehouse, sku, qty) VALUES('Tacoma', 'sku-3', 11);
+## apply SQL in db/mysql/1.sql
 ```
 
 results:
@@ -43,24 +35,6 @@ note there is cost of creating connection at run time as well.
   =================total: 259ms=======================
   =================average: 2ms=============
   ================ Individual ==========================
-```
-
-```mysql-sql
-CREATE TABLE Config(
-        config_id INTEGER AUTO_INCREMENT PRIMARY KEY,
-        config_uuid VARCHAR(64) NOT NULL,
-        a_id INTEGER NOT NULL,
-        environment VARCHAR(32) NOT NULL,
-        requested_on DATETIME NOT NULL,
-        requested_by VARCHAR(64) NOT NULL,
-        approved_on DATETIME,
-        approved_by VARCHAR(64),
-        rejected_on DATETIME,
-        rejected_by VARCHAR(64),
-        canceled_on DATETIME,
-        canceled_by VARCHAR(64),
-        created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
 ```
 
 [oracle 12 db](https://docs.oracle.com/database/121/CNCPT/intro.htm#CNCPT001)

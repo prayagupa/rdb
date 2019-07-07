@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 duwamish-oracle() {
     echo "=========================================================="
     echo "setting up oracle"
