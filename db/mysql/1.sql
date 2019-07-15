@@ -10,6 +10,7 @@ create TABLE Inventory (
 -- ALTER TABLE Inventory ADD PRIMARY KEY(id);
 
 insert into Inventory (warehouse, sku, qty) values('De Moines', 'sku-1', 88);
+insert into Inventory (warehouse, sku, qty) values('De Moines', 'sku-2', 99);
 insert into Inventory (warehouse, sku, qty) values('Seattle', 'sku-2', 99);
 insert into Inventory (warehouse, sku, qty) values('Luyata', 'sku-3', 11);
 
