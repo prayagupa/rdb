@@ -5,7 +5,8 @@ version := "1.0"
 scalaVersion := "2.12.8"
 
 scalacOptions ++= Seq(
-  "-Ypartial-unification"
+  "-Ypartial-unification",
+  "-Xfatal-warnings"
 )
 
 val LogbackVersion = "1.2.3"
