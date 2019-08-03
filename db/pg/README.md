@@ -34,4 +34,31 @@ postgres=> \l
               |          |          |             |             | postgres=CTc/postgres
 (5 rows)
 
+museum_visit=> select count(*) users, max(created)-min(created) time_taken from visiting_user;
+ users |   time_taken    
+-------+-----------------
+ 32075 | 00:49:41.048941
+
+museum_visit=> select count(*) users, max(created)-min(created) time_taken from visiting_user;
+ users |   time_taken    
+-------+-----------------
+ 38788 | 01:00:00.766083
+ 
+museum_visit=> select count(*) users, max(created)-min(created) time_taken from visiting_user;
+ users |   time_taken    
+-------+-----------------
+ 50601 | 01:18:24.258239
+ 
+-- 51548
+
+```
+
+
+```sql
+-- time taken for 100K users creation: 1350,129ms
+museum_visit=> select count(*), max(created) - min(created) time_taken from visiting_user where user_id > 51548;
+ count  |   time_taken    
+--------+-----------------
+ 100000 | 00:22:29.981824
+(1 row)
 ```

@@ -2,9 +2,19 @@ import postgres.DatabaseConnection;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class BigDataPerf {
+
+    private static final IntStream HUNDRED_K_USERS = IntStream.rangeClosed(1, 100000);
+    private static final List<Integer> HUNDRED_K_USERS_ = IntStream.rangeClosed(1, 100000)
+            .mapToObj($ -> $)
+            .collect(Collectors.toList());
 
     private static DatabaseConnection databaseConnection;
     private static String USER_INSERTION = "INSERT INTO visiting_user(user_name) VALUES(?)";
@@ -21,7 +31,14 @@ public class BigDataPerf {
         );
     }
 
-    public static void createUser(int id) {
+    public static CompletableFuture<Integer> createUserAsync(int id) {
+        return CompletableFuture.supplyAsync(() -> {
+            System.out.println("[THREAD " + id + ":]" + Thread.currentThread().getName());
+            return createUser(id);
+        });
+    }
+
+    public static int createUser(int id) {
         databaseConnection.getConnection().ifPresent($ -> {
             try {
                 PreparedStatement statement = $.prepareStatement(USER_INSERTION);
@@ -33,31 +50,42 @@ public class BigDataPerf {
                 e.printStackTrace();
             }
         });
+
+        return id;
     }
 
     public static void main(String[] args) throws ClassNotFoundException {
-        synchronousUsers();
+        parallelUsers().join();
     }
 
     private static void synchronousUsers() throws ClassNotFoundException {
         final BigDataPerf bigDataPerf = new BigDataPerf();
         long start = System.currentTimeMillis();
 
-        IntStream.range(1, 100000).forEach($ -> bigDataPerf.createUser($));
+        HUNDRED_K_USERS.forEach($ -> bigDataPerf.createUser($));
 
         long end = System.currentTimeMillis() - start;
 
         System.out.println("time taken for 100K users creation: " + end + "ms");
     }
 
-    private static void parallelUsers() throws ClassNotFoundException {
-        final BigDataPerf bigDataPerf = new BigDataPerf();
+    private final ForkJoinPool POOL = ForkJoinPool.commonPool();
+
+    private static CompletableFuture<Integer> parallelUsers() throws ClassNotFoundException {
+        final var bigDataPerf = new BigDataPerf();
         long start = System.currentTimeMillis();
+        List<CompletableFuture<Integer>> ps = new ArrayList<>();
 
-        IntStream.range(1, 100000).parallel().forEach($ -> bigDataPerf.createUser($));
+        HUNDRED_K_USERS_.forEach($ -> {
+            ps.add(bigDataPerf.createUserAsync($));
+        });
 
-        long end = System.currentTimeMillis() - start;
-
-        System.out.println("time taken for 100K users creation: " + end + "ms");
+        CompletableFuture[] cfs = ps.toArray(new CompletableFuture[ps.size()]);
+        return CompletableFuture.allOf(cfs).thenApply($ -> {
+            ps.stream().map($__ -> $__.join());
+            long end = System.currentTimeMillis() - start;
+            System.out.println("time taken for 100K users creation: " + end + "ms");
+            return 0;
+        });
     }
 }
