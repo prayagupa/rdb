@@ -12,6 +12,8 @@ public class PostgresExample {
         DatabaseConnection databaseConnection = new DatabaseConnection(
                 "???.???.us-east-1.redshift.amazonaws.com",
                 5439,
+                "postgresql",
+                "org.postgresql.Driver",
                 "???",
                 "???",
                 "???"

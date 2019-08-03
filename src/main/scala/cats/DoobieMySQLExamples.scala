@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.Random
+import scala.language.postfixOps
 
 object Db {
 

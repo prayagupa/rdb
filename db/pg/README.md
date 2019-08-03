@@ -10,6 +10,17 @@ psql (11.4)
 SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES256-GCM-SHA384, bits: 256, compression: off)
 Type "help" for help.
 
+postgres=> SELECT current_database();
+ current_database 
+------------------
+ postgres
+(1 row)
+
+postgres=> \connect museum_visit;
+Password for user postgres: 
+SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES256-GCM-SHA384, bits: 256, compression: off)
+You are now connected to database "museum_visit" as user "postgres".
+
 postgres=> \l
                                    List of databases
      Name     |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges   

@@ -6,7 +6,8 @@ scalaVersion := "2.12.8"
 
 scalacOptions ++= Seq(
   "-Ypartial-unification",
-  "-Xfatal-warnings"
+  "-feature",
+//  "-Xfatal-warnings"
 )
 
 val LogbackVersion = "1.2.3"
@@ -23,7 +24,6 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-h2" % DoobieVersion, // H2 driver 1.4.197 + type mappings.
   "org.tpolecat" %% "doobie-hikari" % DoobieVersion, // HikariCP transactor.
   "org.tpolecat" %% "doobie-postgres" % DoobieVersion, // Postgres driver 42.2.5 + type mappings.
-  "postgresql" % "postgresql" % "9.1-901-1.jdbc4",
 
   "com.h2database" % "h2" % "1.4.197",
   "org.tpolecat" %% "doobie-specs2" % DoobieVersion % "test", // Specs2 support for typechecking statements.
@@ -31,7 +31,10 @@ libraryDependencies ++= Seq(
 
   "dev.zio" %% "zio" % "1.0.0-RC8-6",
 
+  "org.postgresql" % "postgresql" % "42.2.6",
   "mysql" % "mysql-connector-java" % "8.0.11",
+  "com.zaxxer" % "HikariCP" % "3.3.1",
+
   "org.scalatest" %% "scalatest" % "3.0.4",
 )
 
