@@ -6,7 +6,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.sql.*;
 import java.util.Optional;
 
-//FIXME add pool
 public class DatabaseConnection {
 
     private String username;
@@ -28,7 +27,6 @@ public class DatabaseConnection {
 
         this.dbUrl = url1;
 
-        //Class.forName("com.amazon.redshift.jdbc42.Driver");
         Class.forName(driver);
 
         HikariConfig config = new HikariConfig();
@@ -42,6 +40,36 @@ public class DatabaseConnection {
         connectionPool = new HikariDataSource(config);
     }
 
+    public static DatabaseConnection redshift(String host,
+                                       String dbName,
+                                       String username,
+                                       String password) throws ClassNotFoundException {
+        return new DatabaseConnection(
+                host,
+                5439,
+                "redshift",
+                "com.amazon.redshift.jdbc42.Driver",
+                dbName,
+                username,
+                password
+        );
+    }
+
+    public static DatabaseConnection postgres(String host,
+                                              String dbName,
+                                              String username,
+                                              String password) throws ClassNotFoundException {
+        return new DatabaseConnection(
+                host,
+                5432,
+                "postgresql",
+                "org.postgresql.Driver",
+                dbName,
+                username,
+                password
+        );
+    }
+
     public Optional<Connection> getRawConnection() {
         var start = System.currentTimeMillis();
         try {
@@ -50,7 +78,8 @@ public class DatabaseConnection {
             e.printStackTrace();
             return Optional.empty();
         } finally {
-            System.out.println("Getting a connection for " + dbUrl + " took " + (System.currentTimeMillis() - start) + "ms");
+            System.out.println("Getting a connection for " + dbUrl + " took " +
+                    (System.currentTimeMillis() - start) + "ms");
         }
     }
 
@@ -62,7 +91,8 @@ public class DatabaseConnection {
             e.printStackTrace();
             return Optional.empty();
         } finally {
-            System.out.println("Getting a connection for " + dbUrl + " took " + (System.currentTimeMillis() - start) + "ms");
+            System.out.println("Getting a connection for " + dbUrl + " took " +
+                    (System.currentTimeMillis() - start) + "ms");
         }
     }
 }

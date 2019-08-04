@@ -31,15 +31,17 @@ libraryDependencies ++= Seq(
 
   "dev.zio" %% "zio" % "1.0.0-RC8-6",
 
-  "org.postgresql" % "postgresql" % "42.2.6",
-  "mysql" % "mysql-connector-java" % "8.0.11",
   "com.zaxxer" % "HikariCP" % "3.3.1",
+  "org.postgresql" % "postgresql" % "42.2.6",
+  "com.amazon.redshift" % "redshift-jdbc42" % "1.2.10.1009",
+  "mysql" % "mysql-connector-java" % "8.0.11",
 
   "org.scalatest" %% "scalatest" % "3.0.4",
 )
 
 resolvers ++= Seq(
-  "maven2" at "http://central.maven.org/maven2"
+  "maven2" at "http://central.maven.org/maven2",
+  "redshift" at "http://redshift-maven-repository.s3-website-us-east-1.amazonaws.com/release"
 )
 
 enablePlugins(DockerComposePlugin)

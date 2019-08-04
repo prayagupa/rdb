@@ -20,14 +20,11 @@ public class BigDataPerf {
     private static String USER_INSERTION = "INSERT INTO visiting_user(user_name) VALUES(?)";
 
     public BigDataPerf() throws ClassNotFoundException {
-        databaseConnection = new DatabaseConnection(
+        databaseConnection = DatabaseConnection.postgres(
                 "???.%%%.us-east-1.rds.amazonaws.com",
-                5432,
-                "postgresql",
-                "org.postgresql.Driver",
-                "museum_visit",
-                "postgres",
-                "admin54321"
+                "???",
+                "admin",
+                "???"
         );
     }
 
