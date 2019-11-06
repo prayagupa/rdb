@@ -76,8 +76,6 @@ select count(*), max(created) - min(created) time_taken from visiting_user;
 count time_taken
 15666 00:25:13.762115
 
--- 16310
-
 select count(*), max(created) - min(created) time_taken from visiting_user;
 count   time_taken
 44130   02:44:54.269513

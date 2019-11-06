@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = '12'
+targetCompatibility = '12'
+version = '1.2.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
+    compile group: 'com.zaxxer', name: 'HikariCP', version: '2.3.2'
+
+    testCompile "org.testcontainers:postgresql:1.12.3"
+    testCompile "org.testcontainers:testcontainers:1.12.3"
+}
+
+//sourceSets {
+//    main {
+//         java {
+//            srcDirs = ['src']
+//         }
+//    }
+//
+//    test {
+//        java {
+//            srcDirs = ['test']
+//        }
+//    }
+//}
