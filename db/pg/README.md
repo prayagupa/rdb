@@ -4,6 +4,11 @@ postgres
 ```bash
 brew install postgresql
 
+## connect to container
+root@63750bc48a06:/# psql -U postgres
+psql (12.2 (Debian 12.2-1.pgdg100+1))
+Type "help" for help.
+
 λ psql -h analytics.???.us-east-1.rds.amazonaws.com -U postgres -W
 Password: 
 psql (11.4)
@@ -15,6 +20,16 @@ postgres=> SELECT current_database();
 ------------------
  postgres
 (1 row)
+
+postgres=# \d
+                    List of relations
+ Schema |           Name            |   Type   |  Owner
+--------+---------------------------+----------+----------
+ public | museum_visit              | table    | postgres
+ public | museum_visit_visit_id_seq | sequence | postgres
+ public | visiting_user             | table    | postgres
+ public | visiting_user_user_id_seq | sequence | postgres
+(4 rows)
 
 postgres=> \connect museum_visit;
 Password for user postgres: 
@@ -33,6 +48,36 @@ postgres=> \l
  template1    | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
               |          |          |             |             | postgres=CTc/postgres
 (5 rows)
+
+##show tz
+postgres=# SHOW TIMEZONE;
+ TimeZone
+----------
+ Etc/UTC
+(1 row)
+
+postgres=# SELECT CURRENT_TIMESTAMP;
+       current_timestamp
+-------------------------------
+ 2020-02-24 01:23:05.308574+00
+(1 row)
+
+##
+
+postgres=# \x
+Expanded display is on.
+
+postgres=# select * from museum_visit;
+-[ RECORD 1 ]-----+------------------------------
+user_id           | 1
+visit_id          | 1
+museum_name       | Dharahara centre
+department        | Front door
+visit_start_tz    | 2019-08-03 02:00:00+00
+visit_start_local | 2019-08-02 18:00:00
+visit_end_tz      | 2019-08-03 02:10:00+00
+visit_end_local   | 2019-08-02 18:10:00
+created           | 2020-02-24 01:34:34.579363+00
 
 museum_visit=> select count(*) users, max(created)-min(created) time_taken from visiting_user;
  users |   time_taken    

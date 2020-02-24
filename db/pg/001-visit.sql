@@ -1,7 +1,7 @@
 create table visiting_user(
     user_id serial PRIMARY KEY,
     user_name VARCHAR(255),
-    created timestamp DEFAULT CURRENT_TIMESTAMP
+    created timestamptz DEFAULT CURRENT_TIMESTAMP
 );
 
 create TABLE museum_visit (
@@ -9,7 +9,9 @@ create TABLE museum_visit (
     visit_id serial PRIMARY KEY,
     museum_name VARCHAR(255),
     department VARCHAR(255),
-    visit_start timestamp,
-    visit_end timestamp,
-    created timestamp DEFAULT CURRENT_TIMESTAMP
+    visit_start_tz timestamptz,
+    visit_start_local timestamp,
+    visit_end_tz timestamptz,
+    visit_end_local timestamp,
+    created timestamptz DEFAULT CURRENT_TIMESTAMP
 );

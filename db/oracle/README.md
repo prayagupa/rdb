@@ -1,3 +1,25 @@
+
+
+[oracle 12 db](https://docs.oracle.com/database/121/CNCPT/intro.htm#CNCPT001)
+------
+
+```bash
+aws rds describe-db-instances --profile aws-default --region us-west-2
+
+-- add proper firewall to fix Can't connect to MySQL server on
+-- also not just firewall-group, which will work only if the internet gateway is there for your Vitual Private Cloud(VPC) - https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+-- also also also make sure to add subnetwork to route table - https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html
+-- also make sure VPN is not screwing up things
+
+mysql -h duwamish.<<12>>.us-west-2.rds.amazonaws.com -P 3306 -u root -p
+```
+
+takes `~200ms` could be because of oracle connection is via on VPN.
+Weird that `WHERE ROWNUM <=1` adds increases latency.
+
+for testing h2-oracle [http://www.h2database.com/html/features.html](http://www.h2database.com/html/features.html)
+
+
 - https://www.oracle.com/database/technologies/rac.html
 - https://aws.amazon.com/blogs/database/amazon-aurora-as-an-alternative-to-oracle-rac/
 - https://docs.oracle.com/cd/E18283_01/server.112/e17110/bgprocesses.htm
