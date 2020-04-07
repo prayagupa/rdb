@@ -13,5 +13,6 @@ create TABLE museum_visit (
     visit_start_local timestamp,
     visit_end_tz timestamptz,
     visit_end_local timestamp,
-    created timestamptz DEFAULT CURRENT_TIMESTAMP
+    created timestamptz DEFAULT CURRENT_TIMESTAMP,
+    visit_history JSON
 );
