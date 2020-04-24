@@ -3,7 +3,9 @@
 ---
 
 ```bash
-docker-compose up
+docker-compose up mysqldb
+
+mysql -h 127.0.0.1 -u root -p ##r00t
 ```
 
 ```bash
