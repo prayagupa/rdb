@@ -127,3 +127,14 @@ count   time_taken
 
 time taken for 100K users creation: 22440,607ms
 ```
+
+
+export
+------
+
+```sql
+-- change statement execution timeout settings to make sure you can export within time
+COPY (select * from my_table where tb_time_local > '2020-06-01' and tb_time_local < '2500-06-01') 
+TO '/Users/upd/Downloads/team_table.csv' DELIMITER ',' CSV HEADER;
+
+```
