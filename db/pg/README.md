@@ -9,7 +9,7 @@ root@63750bc48a06:/# psql -U postgres
 psql (12.2 (Debian 12.2-1.pgdg100+1))
 Type "help" for help.
 
-λ psql -h analytics.???.us-east-1.rds.amazonaws.com -U postgres -W
+λ psql -h analytics.???.us-east-1.rds.amazonaws.com -p 5432 -d postgres -U postgres -W
 Password: 
 psql (11.4)
 SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES256-GCM-SHA384, bits: 256, compression: off)
