@@ -16,3 +16,7 @@ create TABLE museum_visit (
     created timestamptz DEFAULT CURRENT_TIMESTAMP,
     visit_history JSON
 );
+
+-- https://www.postgresql.org/docs/9.4/datatype-json.html
+-- CREATE INDEX visit_history_key_idx
+-- ON museum_visit (visit_history->>history_hash)
