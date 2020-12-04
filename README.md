@@ -6,8 +6,12 @@ Relational Algebra/ [JOINs](https://goo.gl/cH4lSN)
 [What is Cartesian product in relational algebra?](https://en.wikipedia.org/wiki/Relational_algebra)
 
 ```
-weights = { [packageA1, 100g], [packageA2, 200g]}
-shippingDates = { [packageB1, 07-2016], [packageB2, 08-2016], [packageB3, 09-2016]}
+weights = { 
+             [packageA1, 100g], [packageA2, 200g]
+          }
+shippingDates = { 
+             [packageB1, 07-2016], [packageB2, 08-2016], [packageB3, 09-2016]
+          }
 
 weights * shippingDates = { {[packageA1, 100g], [packageB1, 07-2016]}, 
                             {[packageA1, 100g], [packageB2, 08-2016]},
@@ -20,18 +24,18 @@ weights * shippingDates = { {[packageA1, 100g], [packageB1, 07-2016]},
                             
 ```
 
-[What is the difference between LEFT JOIN and LEFT OUTER JOIN?](http://stackoverflow.com/a/4401540/432903), JWN, 07-2016
+[What is the difference between `LEFT JOIN` and `LEFT OUTER JOIN`?](http://stackoverflow.com/a/4401540/432903), JWN, 07-2016
 
-[Set1 INNER JOIN Set2](https://goo.gl/qZUi8K)
+Intersection: [Set1 `INNER JOIN` Set2](https://goo.gl/qZUi8K)
 
-[Set1 OUTER JOIN Set2](https://goo.gl/IbGzK3)
+(A-B) U (B-A):  [Set1 `OUTER JOIN` Set2](https://goo.gl/IbGzK3)
 
 ```
 The result of a left outer join (or simply left join) for tables A and B always contains all rows 
 of the "left" table (A), even if the join-condition does not find any matching row in the "right" table (B). 
 ```
 
-[LEFT OUTER JOIN operation](http://docs.oracle.com/javadb/10.4.2.1/ref/rrefsqlj18922.html) (INTV, HUM 06-08-2016)
+[`LEFT` OUTER `JOIN` operation](http://docs.oracle.com/javadb/10.4.2.1/ref/rrefsqlj18922.html) (INTV, HUM 06-08-2016)
 
 ```
 It preserves the unmatched rows from the first (left) table, 
@@ -41,15 +45,20 @@ joining them with a NULL row in the shape of the second (right) table.
 
 ![SQL joins](http://i.stack.imgur.com/VQ5XP.png)
 
-[Inner Join vs. Natural Join (JOIN ON), speed-wise?](http://stackoverflow.com/a/4841554/432903)
+[INNER JOIN vs. Natural JOIN (JOIN ON), speed-wise?](http://stackoverflow.com/a/4841554/432903)
 
-[Sset DIfference(A-B) in SQL – M SQL Server](https://timsinajaya.wordpress.com/2010/09/30/set-difference-in-sql-m-sql-server/)
+[Set difference `(A-B)` in SQL – M SQL Server](https://timsinajaya.wordpress.com/2010/09/30/set-difference-in-sql-m-sql-server/)
 
 ```sql
 SELECT DISTINCT A.*
   FROM (A LEFT OUTER JOIN B on A.ID=B.ID) 
     WHERE B.ID IS NULL
 ```
+
+Index
+----
+
+- https://devcenter.heroku.com/articles/postgresql-indexes
 
 Properties
 ----------
@@ -118,7 +127,7 @@ https://en.wikipedia.org/wiki/Partition_(database)
 
 [Performance Considerations for Join Queries](https://www.cloudera.com/documentation/enterprise/5-9-x/topics/impala_perf_joins.html)
 
-[Database pooling](http://stackoverflow.com/a/4041136/432907)
+[database connection pooling](http://stackoverflow.com/a/4041136/432907)
 -------------------
 
 ```
@@ -137,7 +146,7 @@ If your little 4-Core i7 server with one hard disk:
 connection pool = ((4 * 2) + 1) = 9
 ```
 
-[databases connection transport protocals](https://unix.stackexchange.com/a/32138/17781)
+[databases connection transport protocols](https://unix.stackexchange.com/a/32138/17781)
  - TCP
  - Socket (Unix socket file connection to local server)
 
@@ -150,9 +159,21 @@ http://www.methodsandtools.com/archive/archive.php?id=83
 
 https://en.wikipedia.org/wiki/Relational_algebra#Aggregation
 
-related READMEs for databases.
+Scaling
+--------
+
+relational databases
 --
 
 - [mysql/README.md](db/mysql/README.md)
 - [pg/README.md](db/pg/README.md)
+- https://azure.microsoft.com/en-us/services/time-series-insights/
+- https://azure.microsoft.com/en-us/services/synapse-analytics/
 - [oracle/README.md](db/oracle/README.md)
+
+database services:
+- https://docs.microsoft.com/en-us/azure/azure-sql/database/elastic-pool-overview
+
+more:
+- https://www.postgresql.org/docs/9.1/sql-vacuum.html
+- https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line/
