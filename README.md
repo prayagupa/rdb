@@ -1,66 +1,5 @@
 
-
-Relational Algebra/ [JOINs](https://goo.gl/cH4lSN)
---------------------------------------------------
-
-[What is Cartesian product in relational algebra?](https://en.wikipedia.org/wiki/Relational_algebra)
-
-```
-weights = { 
-             [packageA1, 100g], [packageA2, 200g]
-          }
-shippingDates = { 
-             [packageB1, 07-2016], [packageB2, 08-2016], [packageB3, 09-2016]
-          }
-
-weights * shippingDates = { {[packageA1, 100g], [packageB1, 07-2016]}, 
-                            {[packageA1, 100g], [packageB2, 08-2016]},
-                            {[packageA1, 100g], [packageB3, 09-2016]},
-                            
-                            {[packageA2, 200g], [packageB1, 07-2016]},
-                            {[packageA2, 200g], [packageB2, 08-2016]},
-                            {[packageA2, 200g], [packageB3, 09-2016]}
-                            
-                            
-```
-
-[What is the difference between `LEFT JOIN` and `LEFT OUTER JOIN`?](http://stackoverflow.com/a/4401540/432903), JWN, 07-2016
-
-Intersection: [Set1 `INNER JOIN` Set2](https://goo.gl/qZUi8K)
-
-(A-B) U (B-A):  [Set1 `OUTER JOIN` Set2](https://goo.gl/IbGzK3)
-
-```
-The result of a left outer join (or simply left join) for tables A and B always contains all rows 
-of the "left" table (A), even if the join-condition does not find any matching row in the "right" table (B). 
-```
-
-[`LEFT` OUTER `JOIN` operation](http://docs.oracle.com/javadb/10.4.2.1/ref/rrefsqlj18922.html) (INTV, HUM 06-08-2016)
-
-```
-It preserves the unmatched rows from the first (left) table, 
-joining them with a NULL row in the shape of the second (right) table.
-```
-
-
-![SQL joins](http://i.stack.imgur.com/VQ5XP.png)
-
-[INNER JOIN vs. Natural JOIN (JOIN ON), speed-wise?](http://stackoverflow.com/a/4841554/432903)
-
-[Set difference `(A-B)` in SQL – M SQL Server](https://timsinajaya.wordpress.com/2010/09/30/set-difference-in-sql-m-sql-server/)
-
-```sql
-SELECT DISTINCT A.*
-  FROM (A LEFT OUTER JOIN B on A.ID=B.ID) 
-    WHERE B.ID IS NULL
-```
-
-Index
-----
-
-- https://devcenter.heroku.com/articles/postgresql-indexes
-
-Properties
+database properties
 ----------
 
 https://en.wikipedia.org/wiki/ACID#Characteristics
@@ -127,6 +66,72 @@ https://en.wikipedia.org/wiki/Partition_(database)
 
 [Performance Considerations for Join Queries](https://www.cloudera.com/documentation/enterprise/5-9-x/topics/impala_perf_joins.html)
 
+Relational Algebra/ [JOINs](https://goo.gl/cH4lSN)
+--------------------------------------------------
+
+[What is Cartesian product in relational algebra?](https://en.wikipedia.org/wiki/Relational_algebra)
+
+```
+weights = { 
+             [packageA1, 100g], [packageA2, 200g]
+          }
+shippingDates = { 
+             [packageB1, 07-2016], [packageB2, 08-2016], [packageB3, 09-2016]
+          }
+
+weights * shippingDates = { {[packageA1, 100g], [packageB1, 07-2016]}, 
+                            {[packageA1, 100g], [packageB2, 08-2016]},
+                            {[packageA1, 100g], [packageB3, 09-2016]},
+                            
+                            {[packageA2, 200g], [packageB1, 07-2016]},
+                            {[packageA2, 200g], [packageB2, 08-2016]},
+                            {[packageA2, 200g], [packageB3, 09-2016]}
+                            
+                            
+```
+
+[What is the difference between `LEFT JOIN` and `LEFT OUTER JOIN`?](http://stackoverflow.com/a/4401540/432903), JWN, 07-2016
+
+Intersection: [Set1 `INNER JOIN` Set2](https://goo.gl/qZUi8K)
+
+(A-B) U (B-A):  [Set1 `OUTER JOIN` Set2](https://goo.gl/IbGzK3)
+
+```
+The result of a left outer join (or simply left join) for tables A and B always contains all rows 
+of the "left" table (A), even if the join-condition does not find any matching row in the "right" table (B). 
+```
+
+[`LEFT` OUTER `JOIN` operation](http://docs.oracle.com/javadb/10.4.2.1/ref/rrefsqlj18922.html) (INTV, HUM 06-08-2016)
+
+```
+It preserves the unmatched rows from the first (left) table, 
+joining them with a NULL row in the shape of the second (right) table.
+```
+
+
+![SQL joins](http://i.stack.imgur.com/VQ5XP.png)
+
+[INNER JOIN vs. Natural JOIN (JOIN ON), speed-wise?](http://stackoverflow.com/a/4841554/432903)
+
+[Set difference `(A-B)` in SQL – M SQL Server](https://timsinajaya.wordpress.com/2010/09/30/set-difference-in-sql-m-sql-server/)
+
+```sql
+SELECT DISTINCT A.*
+  FROM (A LEFT OUTER JOIN B on A.ID=B.ID) 
+    WHERE B.ID IS NULL
+```
+
+data indexing
+----
+
+- https://devcenter.heroku.com/articles/postgresql-indexes
+
+partitioning
+-------------
+
+- https://www.postgresql.org/docs/10/ddl-partitioning.html
+- https://blog.timescale.com/blog/scaling-partitioning-data-postgresql-10-explained-cd48a712a9a1/
+
 [database connection pooling](http://stackoverflow.com/a/4041136/432907)
 -------------------
 
@@ -151,6 +156,16 @@ connection pool = ((4 * 2) + 1) = 9
  - Socket (Unix socket file connection to local server)
 
 https://www.datastax.com/dev/blog/binary-protocol
+
+database page
+--------------
+
+- Database stores all records inside a fixed-size disk unit which is commonly called a "page" 
+(Some database engine sometimes calls it a "block" instead).
+- the internal basic structure to organize the data in the database files.
+
+- https://www.postgresql.org/docs/8.0/storage-page-layout.html
+- https://dev.mysql.com/doc/internals/en/innodb-page-structure.html
 
 Transaction locking
 --------------------

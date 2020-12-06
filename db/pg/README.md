@@ -2,8 +2,11 @@ postgres
 -------
 
 ```bash
+## install psql CLI
 brew install postgresql
+```
 
+```
 ## connect to container
 root@63750bc48a06:/# psql -U postgres
 psql (12.2 (Debian 12.2-1.pgdg100+1))
@@ -14,7 +17,9 @@ Password:
 psql (11.4)
 SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES256-GCM-SHA384, bits: 256, compression: off)
 Type "help" for help.
+```
 
+```
 postgres=> SELECT current_database();
  current_database 
 ------------------
