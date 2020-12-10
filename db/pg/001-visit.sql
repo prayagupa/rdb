@@ -1,10 +1,10 @@
-create table visiting_user(
+create table IF NOT EXISTS visiting_user(
     user_id serial PRIMARY KEY,
     user_name VARCHAR(255),
     created timestamptz DEFAULT CURRENT_TIMESTAMP
 );
 
-create TABLE museum_visit (
+create TABLE IF NOT EXISTS museum_visit (
     user_id INT references visiting_user(user_id),
     visit_id serial PRIMARY KEY,
     museum_name VARCHAR(255),

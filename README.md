@@ -46,8 +46,7 @@ end
 
 ![](http://the-paper-trail.org/blog/wp-content/uploads/2010/01/tpc-fault-free-phase-1.png)
 
-Disadvantage
-------------
+**2PC disadvantage: **
 
 ```
 The greatest disadvantage of the 2PC protocol is that it is a blocking protocol. 
@@ -132,6 +131,20 @@ partitioning
 - https://www.postgresql.org/docs/10/ddl-partitioning.html
 - https://blog.timescale.com/blog/scaling-partitioning-data-postgresql-10-explained-cd48a712a9a1/
 
+data archiving
+--------------
+
+- https://aws.amazon.com/blogs/database/archiving-data-from-relational-databases-to-amazon-glacier-via-aws-dms/
+- https://aws.amazon.com/dms/
+- https://www.fusionbox.com/blog/detail/postgresql-wal-archiving-with-wal-g-and-s3-complete-walkthrough/644/
+
+- https://www.percona.com/blog/2019/07/10/wal-retention-and-clean-up-pg_archivecleanup/
+- https://www.postgresql.org/docs/9.1/sql-vacuum.html
+- https://www.postgresql.org/docs/9.3/continuous-archiving.html
+- https://www.postgresql.org/docs/11/routine-vacuuming.html
+- https://confluence.atlassian.com/kb/optimize-and-improve-postgresql-performance-with-vacuum-analyze-and-reindex-885239781.html
+- https://docs.microsoft.com/en-us/azure/backup/backup-azure-database-postgresql
+
 [database connection pooling](http://stackoverflow.com/a/4041136/432907)
 -------------------
 
@@ -167,15 +180,28 @@ database page
 - https://www.postgresql.org/docs/8.0/storage-page-layout.html
 - https://dev.mysql.com/doc/internals/en/innodb-page-structure.html
 
-Transaction locking
+transaction locking
 --------------------
 
-http://www.methodsandtools.com/archive/archive.php?id=83
+- http://www.methodsandtools.com/archive/archive.php?id=83
 
-https://en.wikipedia.org/wiki/Relational_algebra#Aggregation
+- https://en.wikipedia.org/wiki/Relational_algebra#Aggregation
 
-Scaling
+High Availability(A), Load Balancing, and Data replication
 --------
+
+- https://www.postgresql.org/docs/9.3/high-availability.html
+- https://wiki.postgresql.org/wiki/Streaming_Replication
+
+db performance
+------------
+
+- https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line/
+
+database designs
+-------
+
+- https://github.com/parayaluyanta/SOA/blob/master/system_design/photo_sharing_service.md#step-4-data-model-definition-design
 
 relational databases
 --
@@ -186,9 +212,7 @@ relational databases
 - https://azure.microsoft.com/en-us/services/synapse-analytics/
 - [oracle/README.md](db/oracle/README.md)
 
-database services:
-- https://docs.microsoft.com/en-us/azure/azure-sql/database/elastic-pool-overview
+database services
+--
 
-more:
-- https://www.postgresql.org/docs/9.1/sql-vacuum.html
-- https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line/
+- https://docs.microsoft.com/en-us/azure/azure-sql/database/elastic-pool-overview

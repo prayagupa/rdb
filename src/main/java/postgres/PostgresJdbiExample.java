@@ -7,8 +7,11 @@ import java.time.ZonedDateTime;
 
 public class PostgresJdbiExample {
 
-    static Jdbi jdbi = Jdbi.create("jdbc:postgresql://localhost:5432/postgres", "postgres", "root")
-            .installPlugin(new PostgresPlugin());
+    static Jdbi jdbi = Jdbi.create(
+            "jdbc:postgresql://localhost:5432/postgres",
+            "postgres",
+            "pachhigares"
+    ).installPlugin(new PostgresPlugin());
 
     public static void main(String[] args) {
         MuseumVisit v = MuseumVisit.builder()
