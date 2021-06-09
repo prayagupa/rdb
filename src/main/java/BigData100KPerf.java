@@ -9,7 +9,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class BigDataPerf {
+public class BigData100KPerf {
 
     private static final IntStream HUNDRED_K_USERS = IntStream.rangeClosed(1, 100000);
     private static final List<Integer> HUNDRED_K_USERS_ = IntStream.rangeClosed(1, 100000)
@@ -19,7 +19,7 @@ public class BigDataPerf {
     private static DatabaseConnection databaseConnection;
     private static String USER_INSERTION = "INSERT INTO visiting_user(user_name) VALUES(?)";
 
-    public BigDataPerf() throws ClassNotFoundException {
+    public BigData100KPerf() throws ClassNotFoundException {
         databaseConnection = DatabaseConnection.postgres(
                 "???.%%%.us-east-1.rds.amazonaws.com",
                 "???",
@@ -56,10 +56,10 @@ public class BigDataPerf {
     }
 
     private static void synchronousUsers() throws ClassNotFoundException {
-        final BigDataPerf bigDataPerf = new BigDataPerf();
+        final BigData100KPerf bigData100KPerf = new BigData100KPerf();
         long start = System.currentTimeMillis();
 
-        HUNDRED_K_USERS.forEach($ -> bigDataPerf.createUser($));
+        HUNDRED_K_USERS.forEach($ -> bigData100KPerf.createUser($));
 
         long end = System.currentTimeMillis() - start;
 
@@ -69,7 +69,7 @@ public class BigDataPerf {
     private final ForkJoinPool POOL = ForkJoinPool.commonPool();
 
     private static CompletableFuture<Integer> parallelUsers() throws ClassNotFoundException {
-        final var bigDataPerf = new BigDataPerf();
+        final var bigDataPerf = new BigData100KPerf();
         long start = System.currentTimeMillis();
         List<CompletableFuture<Integer>> ps = new ArrayList<>();
 

@@ -42,6 +42,7 @@ public class MultipleTransactionPerf {
 
             String compiledQuery = "INSERT INTO CUSTOMER(id, name, address, loyalty_point, username)" +
                     " VALUES" + "(?, ?, ?, ?, ?)";
+
             preparedStatement = connection.prepareStatement(compiledQuery);
 
             long start = System.currentTimeMillis();

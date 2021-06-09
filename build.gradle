@@ -19,10 +19,13 @@ dependencies {
     compile group: 'org.jdbi', name: 'jdbi3-postgres', version: '3.12.0'
     compile group: 'org.jdbi', name: 'jdbi3-jackson2', version: '3.12.2'
 
+    // https://mvnrepository.com/artifact/sg-cdb/sg-cdb/1.0.4
+//    implementation group: 'sg-cdb', name: 'sg-cdb', version: '1.0.4'
+
     compile group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
-    //TODO add lombok
+    testImplementation group: 'com.h2database', name: 'h2', version: '1.4.200'
 
     testCompile group: 'com.opentable.components', name: 'otj-pg-embedded', version: '0.1.1'
     testCompile "org.testcontainers:postgresql:1.12.3"

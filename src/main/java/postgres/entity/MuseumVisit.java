@@ -1,4 +1,4 @@
-package postgres;
+package postgres.entity;
 
 import lombok.Builder;
 import lombok.Getter;

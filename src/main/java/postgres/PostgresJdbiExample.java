@@ -2,6 +2,7 @@ package postgres;
 
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.postgres.PostgresPlugin;
+import postgres.entity.MuseumVisit;
 
 import java.time.ZonedDateTime;
 

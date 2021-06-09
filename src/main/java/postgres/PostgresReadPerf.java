@@ -6,6 +6,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 
+/**
+ * schema: db/pg/001-visit.sql
+ * streaming: https://www.postgresql-archive.org/Streaming-ResultSet-td2168704.html
+ */
 public class PostgresReadPerf {
 
     private static final String READ_ONE_USER = "SELECT * FROM visiting_user LIMIT 1";
