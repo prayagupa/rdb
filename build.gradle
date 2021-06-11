@@ -28,8 +28,8 @@ dependencies {
     testImplementation group: 'com.h2database', name: 'h2', version: '1.4.200'
 
     testCompile group: 'com.opentable.components', name: 'otj-pg-embedded', version: '0.1.1'
-    testCompile "org.testcontainers:postgresql:1.12.3"
-    testCompile "org.testcontainers:testcontainers:1.12.3"
+    testCompile "org.testcontainers:postgresql:1.15.3"
+    testCompile "org.testcontainers:testcontainers:1.15.3"
 }
 
 //sourceSets {

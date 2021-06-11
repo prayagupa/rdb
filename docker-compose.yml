@@ -42,3 +42,11 @@ services:
       - ./db/pg:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432
+
+  local_cdb:
+    image: cockroachdb/cockroach:v21.1.2
+    volumes:
+      - ./db/cdb:/docker-entrypoint-initdb.d
+    ports:
+        - 5555:5555
+
