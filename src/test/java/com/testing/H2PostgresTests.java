@@ -14,14 +14,16 @@ import java.util.LinkedList;
  * $ ls -l /Users/a1353612/pya.*
  * -rw-r--r--  1 py  NA\Domain Users  20480 Jun  9 13:37 /Users/a1353612/pya.mv.db
  * -rw-r--r--  1 py  NA\Domain Users    261 Jun  9 13:37 /Users/a1353612/pya.trace.db
+ *
+ * http://www.h2database.com/html/features.html#connection_modes
  */
-public class H2Tests {
+public class H2PostgresTests {
 
     Server h2MemServer;
 
     private static final String JDBC_DRIVER = "org.h2.Driver";
     private static final String DATABASE_NAME = "pya";
-    private static final String DB_URL = "jdbc:h2:~/" + DATABASE_NAME;
+    private static final String DB_URL = "jdbc:h2:~/" + DATABASE_NAME + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE";
 
     private static final String USER = "sa";
     private static final String PASS = "";
