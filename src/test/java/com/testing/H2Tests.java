@@ -1,22 +1,14 @@
 package com.testing;
 
-import org.h2.tools.RunScript;
 import org.h2.tools.Server;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 
 /**
  * $ ls -l /Users/a1353612/pya.*
@@ -34,6 +26,8 @@ public class H2Tests {
     private static final String USER = "sa";
     private static final String PASS = "";
 
+    H2DbManager h2DbManager = new H2DbManager(DATABASE_NAME, DB_URL, USER, PASS);
+
     @Before
     public void setup() throws SQLException, ClassNotFoundException {
 //        h2MemServer = Server.createPgServer("-tcpPort", "9123", "-tcpAllowOthers").start();
@@ -44,7 +38,14 @@ public class H2Tests {
                 " last_name VARCHAR(255), " +
                 " seen_days INTEGER)";
 //        applySql(customerSchema);
-        applySqlScript("db/h2/schema.sql");
+
+        var sqls = new LinkedList<String>() {
+            {
+                add("db/h2/schema.sql");
+                add("db/h2/data/data.sql");
+            }
+        };
+        h2DbManager.applySqlScripts(sqls);
     }
 
     @Test
@@ -53,8 +54,8 @@ public class H2Tests {
             var conn = DriverManager.getConnection(DB_URL, USER, PASS);
             var stmt = conn.createStatement();
 
-            String userDataSql1 = "INSERT INTO customer(first_name, last_name, seen_days) " + "VALUES ('Ya1', 'PY1', 30)";
-            String userDataSql2 = "INSERT INTO customer(first_name, last_name, seen_days) " + "VALUES ('Ya2', 'PY2', 33)";
+            String userDataSql1 = "INSERT INTO customer(first_name, last_name, seen_days) " + "VALUES ('Ya-hard-1', 'PY1', 30)";
+            String userDataSql2 = "INSERT INTO customer(first_name, last_name, seen_days) " + "VALUES ('Ya-hard-2', 'PY2', 33)";
             stmt.executeUpdate(userDataSql1);
             System.out.println(userDataSql1);
 
@@ -88,56 +89,6 @@ public class H2Tests {
     @After
     public void teardown() {
 //        h2MemServer.shutdown();
-        String customerSchema = "DROP TABLE customer";
-        applySql(customerSchema);
-    }
-
-    private void applySqlScript(String file) {
-        try (var conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
-            FileInputStream is = new FileInputStream(new File(file));
-            InputStreamReader reader = new InputStreamReader(is);
-
-            System.out.println("---------------------------------------");
-            System.out.println("executing: " + readInputStreamAsString(new FileInputStream(new File(file))));
-            ResultSet execute = RunScript.execute(conn, reader);
-            if (execute != null) {
-                while (execute.next()) {
-                    System.out.println("executed: " + reader);
-                }
-            }
-            System.out.println("---------------------------------------");
-        } catch (Exception se) {
-            se.printStackTrace();
-        }
-    }
-
-    private void applySql(String customerSchema) {
-        try (var conn = DriverManager.getConnection(DB_URL, USER, PASS);
-             var stmt = conn.createStatement()) {
-            int i = stmt.executeUpdate(customerSchema);
-            System.out.println("---------------------------------------");
-            if (i > 0) {
-                System.out.println("SUCCESS: " + i + ": " + customerSchema);
-            } else {
-                System.out.println("SUCCESS: " + customerSchema);
-            }
-            System.out.println("---------------------------------------");
-        } catch (Exception se) {
-            se.printStackTrace();
-        }
-    }
-
-    public static String readInputStreamAsString(InputStream in)
-            throws IOException {
-
-        BufferedInputStream bis = new BufferedInputStream(in);
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        int result = bis.read();
-        while(result != -1) {
-            byte b = (byte)result;
-            buf.write(b);
-            result = bis.read();
-        }
-        return buf.toString();
+        h2DbManager.applySql("DROP TABLE customer");
     }
 }
