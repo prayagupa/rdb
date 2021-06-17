@@ -124,6 +124,8 @@ data indexing
 ----
 
 - https://devcenter.heroku.com/articles/postgresql-indexes
+- https://www.postgresql.org/docs/9.1/sql-set-constraints.html
+- https://stackoverflow.com/questions/5300307/not-deferrable-versus-deferrable-initially-immediate
 
 partitioning
 -------------

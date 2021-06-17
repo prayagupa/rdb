@@ -33,7 +33,7 @@ public class H2DbManager {
                 FileInputStream is = new FileInputStream(new File(file));
                 InputStreamReader reader = new InputStreamReader(is);
                 System.out.println("---------------------------------------");
-                System.out.println("executing: " + readInputStreamAsString(new FileInputStream(new File(file))));
+                System.out.println("executing: " + Util.readInputStreamAsString(new FileInputStream(new File(file))));
                 ResultSet execute = RunScript.execute(conn, reader);
                 if (execute != null) {
                     while (execute.next()) {
@@ -54,7 +54,7 @@ public class H2DbManager {
             InputStreamReader reader = new InputStreamReader(is);
 
             System.out.println("---------------------------------------");
-            System.out.println("executing: " + readInputStreamAsString(new FileInputStream(new File(file))));
+            System.out.println("executing: " + Util.readInputStreamAsString(new FileInputStream(new File(file))));
             ResultSet execute = RunScript.execute(conn, reader);
             if (execute != null) {
                 while (execute.next()) {
@@ -81,19 +81,5 @@ public class H2DbManager {
         } catch (Exception se) {
             se.printStackTrace();
         }
-    }
-
-    public static String readInputStreamAsString(InputStream in)
-            throws IOException {
-
-        BufferedInputStream bis = new BufferedInputStream(in);
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        int result = bis.read();
-        while (result != -1) {
-            byte b = (byte) result;
-            buf.write(b);
-            result = bis.read();
-        }
-        return buf.toString();
     }
 }
