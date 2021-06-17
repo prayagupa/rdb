@@ -32,7 +32,7 @@ services:
       - /data/oracle:/opt/oracle/oradata
       - ./db:/docker-entrypoint-initdb.d/setup
 
-  localpostgresdb:
+  local_pgdb:
     image: postgres
     restart: always
     environment:

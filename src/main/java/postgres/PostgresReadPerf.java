@@ -1,9 +1,13 @@
 package postgres;
 
+import util.Util;
+
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -18,7 +22,9 @@ public class PostgresReadPerf {
     private static final String READ_ALL = "SELECT * FROM museum_visit " +
             "WHERE visit_start > ? AND visit_start < ?";
 
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static Map<Integer, Long> timeMap = new HashMap<>();
+
+    public static void main(String[] args) throws ClassNotFoundException, IOException {
         DatabaseConnection databaseConnection = DatabaseConnection.redshift(
                 "???.us-east-1.redshift.amazonaws.com",
                 "analytics",
@@ -26,19 +32,25 @@ public class PostgresReadPerf {
                 "???"
         );
 
-        readOne(databaseConnection);
+        int i = 0;
+        while (i < 100) {
+            readOne(i, databaseConnection);
+            i++;
+        }
+
+        Util.writeToFile("db/redshift/perf/read_one_record.csv", timeMap);
     }
 
-    private static void readOne(DatabaseConnection databaseConnection) {
+    private static void readOne(int i, DatabaseConnection databaseConnectionPool) {
         final var start = System.currentTimeMillis();
 
-        Optional<Connection> connectionMaybe = databaseConnection.getConnection();
+        Optional<Connection> connectionMaybe = databaseConnectionPool.getConnection();
 
         connectionMaybe.ifPresent(connection -> {
-            System.out.println("making a transaction");
+//            System.out.println("making a transaction");
             try {
-                Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery(READ_ONE_USER);
+                var statement = connection.prepareStatement(READ_ONE_USER);
+                ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
                     System.out.println(resultSet.getString("user_id"));
                 }
@@ -47,7 +59,9 @@ public class PostgresReadPerf {
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
-                System.out.println("time taken: " + (System.currentTimeMillis() - start));
+                long timeTaken = System.currentTimeMillis() - start;
+//                System.out.println("time taken: " + timeTaken);
+                timeMap.put(i, timeTaken);
                 // time taken: 4186 to fetch one redshift record initially, later ~400ms
             }
         });
