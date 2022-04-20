@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     compile group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
-    compile group: 'com.zaxxer', name: 'HikariCP', version: '2.3.2'
+    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.4.5'
 
     compile group: 'org.jdbi', name: 'jdbi3-core', version: '3.12.0'
     compile group: 'org.jdbi', name: 'jdbi3-sqlobject', version: '3.12.0'
