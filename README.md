@@ -9,7 +9,7 @@ https://en.wikipedia.org/wiki/ACID#Characteristics
 |-----------|-------|
 | A | all or nothing // on power failures, errors, and crashes trxn is either COMMITED or ROLLED BACK |
 | C | ensures that any transaction will bring the database from one valid state to another. |
-| I | concurrent execution of transactions results in a system state that would be obtained if transactions were executed serially, i.e., one after the other |
+| I | concurrent execution of transactions results in a system state that would be obtained if transactions were executed serially, i.e., one after the other (JDBC default isolation level: TRANSACTION_READ_COMMITTED, https://docs.oracle.com/cd/E19830-01/819-4721/beamv/index.html), https://en.wikipedia.org/wiki/Isolation_(database_systems) |
 | D | once a transaction has been committed, it will remain so, even in the event of power loss, crashes, or errors |
 
 
@@ -124,6 +124,8 @@ data indexing
 ----
 
 - https://devcenter.heroku.com/articles/postgresql-indexes
+- https://www.postgresql.org/docs/9.1/sql-set-constraints.html
+- https://stackoverflow.com/questions/5300307/not-deferrable-versus-deferrable-initially-immediate
 
 partitioning
 -------------

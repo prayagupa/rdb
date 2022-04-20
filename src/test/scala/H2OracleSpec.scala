@@ -11,7 +11,7 @@ import doobie.implicits._
 
 import scala.concurrent.ExecutionContext
 
-class InMemoryOracleSpec extends FunSpec {
+class H2OracleSpec extends FunSpec {
 
   val inMemoryServer: Server = Server.createTcpServer("-tcpPort", "9092", "-tcpAllowOthers")
 

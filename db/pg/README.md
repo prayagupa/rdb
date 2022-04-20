@@ -157,3 +157,15 @@ COPY (select * from my_table where tb_time_local > '2020-06-01' and tb_time_loca
 TO '/Users/upd/Downloads/team_table.csv' DELIMITER ',' CSV HEADER;
 
 ```
+
+
+```bash
+
+initdb - create a new PostgreSQL database cluster
+
+file = "file:/Users/prayagupd/.m2/repository/io/zonky/test/postgres/embedded-postgres-binaries-darwin-amd64/10.15.0-1/embedded-postgres-binaries-darwin-amd64-10.15.0-1.jar!/postgres-darwin-x86_64.txz"
+
+/var/folders/t0/d_6dzlq541v5tm9217k13wyx81n8sq/T/embedded-pg/PG-b5deca9b00e4aec854a9675e6695f78b/bin/pg_ctl -D /tmp/pg_unit_tests/data -l logfile start
+
+/var/folders/t0/d_6dzlq541v5tm9217k13wyx81n8sq/T/embedded-pg/PG-b5deca9b00e4aec854a9675e6695f78b/bin/initdb, -A, trust, -U, postgres, -D, /tmp/pg_unit_tests/data, -E, UTF-8
+```

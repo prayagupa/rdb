@@ -1,18 +1,18 @@
-create table IF NOT EXISTS visiting_user(
+CREATE TABLE IF NOT EXISTS visiting_user(
     user_id serial PRIMARY KEY,
     user_name VARCHAR(255),
     created timestamptz DEFAULT CURRENT_TIMESTAMP
 );
 
-create TABLE IF NOT EXISTS museum_visit (
-    user_id INT references visiting_user(user_id),
+CREATE TABLE IF NOT EXISTS museum_visit (
+    user_id INT REFERENCES visiting_user(user_id),
     visit_id serial PRIMARY KEY,
     museum_name VARCHAR(255),
     department VARCHAR(255),
-    visit_start_tz timestamptz,
-    visit_start_local timestamp,
-    visit_end_tz timestamptz,
-    visit_end_local timestamp,
+    visit_start_tz TIMESTAMPTZ,
+    visit_start_local TIMESTAMP,
+    visit_end_tz TIMESTAMPTZ,
+    visit_end_local TIMESTAMP,
     created timestamptz DEFAULT CURRENT_TIMESTAMP,
     visit_history JSON
 );

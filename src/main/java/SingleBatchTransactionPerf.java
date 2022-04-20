@@ -28,6 +28,7 @@ public class SingleBatchTransactionPerf {
 
             String compiledQuery = "INSERT INTO customer(id, name, address, loyalty_point, username)" +
                     " VALUES" + "(?, ?, ?, ?, ?)";
+
             preparedStatement = connection.prepareStatement(compiledQuery);
 
             for(int index = 1; index <= records; index++) {
