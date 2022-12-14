@@ -1,15 +1,15 @@
-create table visiting_user(
-    user_id int identity(1, 1) PRIMARY KEY,
+CREATE TABLE visiting_user(
+    user_id INT IDENTITY(1, 1) PRIMARY KEY,
     user_name VARCHAR(255),
-    created timestamp DEFAULT CURRENT_TIMESTAMP
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 create TABLE museum_visit (
-    user_id INT references visiting_user(user_id),
-    visit_id int identity(1, 1) PRIMARY KEY,
+    user_id INT REFERENCES visiting_user(user_id),
+    visit_id int IDENTITY(1, 1) PRIMARY KEY,
     museum_name VARCHAR(255),
     department VARCHAR(255),
-    visit_start timestamp,
-    visit_end timestamp,
-    created timestamp DEFAULT CURRENT_TIMESTAMP
+    visit_start TIMESTAMP,
+    visit_end TIMESTAMP,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

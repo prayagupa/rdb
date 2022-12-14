@@ -16,7 +16,7 @@ import java.util.Optional;
  */
 public class PostgresReadPerf {
 
-    private static final String READ_ONE_USER = "SELECT * FROM visiting_user LIMIT 1";
+    private static final String READ_ONE_USER = "SELECT * FROM visit LIMIT 1";
 
     private static final String READ_ONE_VISIT = "SELECT * FROM museum_visit LIMIT 1";
     private static final String READ_ALL = "SELECT * FROM museum_visit " +
@@ -26,10 +26,10 @@ public class PostgresReadPerf {
 
     public static void main(String[] args) throws ClassNotFoundException, IOException {
         DatabaseConnection databaseConnection = DatabaseConnection.redshift(
-                "???.us-east-1.redshift.amazonaws.com",
-                "analytics",
+                "localhost",
+                "database???",
                 "admin",
-                "???"
+                "password???"
         );
 
         int i = 0;
@@ -38,7 +38,7 @@ public class PostgresReadPerf {
             i++;
         }
 
-        Util.writeToFile("db/redshift/perf/read_one_record.csv", timeMap);
+        Util.writeToFile(PostgresReadPerf.class.getName(), "read", "db/redshift/perf/read_one_record.csv", timeMap);
     }
 
     private static void readOne(int i, DatabaseConnection databaseConnectionPool) {
@@ -52,7 +52,7 @@ public class PostgresReadPerf {
                 var statement = connection.prepareStatement(READ_ONE_USER);
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    System.out.println(resultSet.getString("user_id"));
+                    System.out.println(resultSet.getString("visit_id"));
                 }
 
                 connection.close();
