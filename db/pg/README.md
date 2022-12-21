@@ -8,6 +8,8 @@ brew install postgresql
 
 ```
 ## connect to container
+psql -h 127.0.0.1 -p 5432 -U postgres
+
 root@63750bc48a06:/# psql -U postgres
 psql (12.2 (Debian 12.2-1.pgdg100+1))
 Type "help" for help.

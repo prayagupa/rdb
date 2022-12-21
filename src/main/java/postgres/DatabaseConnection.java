@@ -27,10 +27,12 @@ public class DatabaseConnection {
 
         String url1 = "jdbc:"+ dbIdentifier + "://" + host + ":" + port + "/" + dbName;
 
+        System.out.println("============= Creating database pool ============");
         this.dbUrl = url1;
 
         Class.forName(driver);
 
+        System.out.println(dbUrl);
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(url1);
         config.setUsername(this.username);
@@ -38,17 +40,23 @@ public class DatabaseConnection {
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.setConnectionTimeout(1000);
+        config.setIdleTimeout(10000);
+        config.setMaximumPoolSize(2);
+        System.out.println("============= Created database config ============");
 
         connectionPool = new HikariDataSource(config);
+        System.out.println("============= Created database pool ============");
     }
 
     public static DatabaseConnection redshift(String host,
+                                              int port,
                                        String dbName,
                                        String username,
                                        String password) throws ClassNotFoundException {
         return new DatabaseConnection(
                 host,
-                5439,
+                port,
                 "redshift",
                 "com.amazon.redshift.jdbc42.Driver",
                 dbName,
@@ -58,12 +66,13 @@ public class DatabaseConnection {
     }
 
     public static DatabaseConnection postgres(String host,
+                                              int port,
                                               String dbName,
                                               String username,
                                               String password) throws ClassNotFoundException {
         return new DatabaseConnection(
                 host,
-                5432,
+                port,
                 "postgresql",
                 "org.postgresql.Driver",
                 dbName,

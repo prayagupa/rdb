@@ -26,8 +26,9 @@ public class PostgresBigData100KWritePerf {
     public PostgresBigData100KWritePerf() throws ClassNotFoundException {
         databaseConnection = DatabaseConnection.redshift(
                 "localhost",
+                5439,
                 "database???",
-                "admin",
+                "username???",
                 "password???"
         );
     }

@@ -14,32 +14,28 @@ import java.util.Optional;
  * schema: db/pg/001-visit.sql
  * streaming: https://www.postgresql-archive.org/Streaming-ResultSet-td2168704.html
  */
-public class PostgresReadPerf {
+public class RedshiftReadPerf {
 
-    private static final String READ_ONE_USER = "SELECT * FROM visit LIMIT 1";
-
-    private static final String READ_ONE_VISIT = "SELECT * FROM museum_visit LIMIT 1";
-    private static final String READ_ALL = "SELECT * FROM museum_visit " +
-            "WHERE visit_start > ? AND visit_start < ?";
+    private static final String READ_ONE_USER = "select * from visit limit 1;";
 
     public static Map<Integer, Long> timeMap = new HashMap<>();
 
     public static void main(String[] args) throws ClassNotFoundException, IOException {
-        DatabaseConnection databaseConnection = DatabaseConnection.redshift(
+        DatabaseConnection databaseConnection = DatabaseConnection.postgres(
                 "localhost",
-                5432,
+                5439,
                 "database???",
-                "admin",
+                "username???",
                 "password???"
         );
 
         int i = 0;
-        while (i < 100) {
+        while (i < 10) {
             readOne(i, databaseConnection);
             i++;
         }
 
-        Util.writeToFile(PostgresReadPerf.class.getName(), "read", "db/redshift/perf/read_one_record.csv", timeMap);
+        Util.writeToFile(RedshiftReadPerf.class.getName(), "read", "db/redshift/perf/read_one_record__.csv", timeMap);
     }
 
     private static void readOne(int i, DatabaseConnection databaseConnectionPool) {
@@ -53,7 +49,7 @@ public class PostgresReadPerf {
                 var statement = connection.prepareStatement(READ_ONE_USER);
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    System.out.println(resultSet.getString("visit_id"));
+                    System.out.println("SQL result: " + resultSet.getString("visit_id"));
                 }
 
                 connection.close();

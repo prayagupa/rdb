@@ -1,0 +1,11 @@
+context,operation,iteration,time taken in millis
+postgres.RedshiftReadPerf,read,0,259
+postgres.RedshiftReadPerf,read,1,228
+postgres.RedshiftReadPerf,read,2,227
+postgres.RedshiftReadPerf,read,3,238
+postgres.RedshiftReadPerf,read,4,229
+postgres.RedshiftReadPerf,read,5,232
+postgres.RedshiftReadPerf,read,6,230
+postgres.RedshiftReadPerf,read,7,120
+postgres.RedshiftReadPerf,read,8,120
+postgres.RedshiftReadPerf,read,9,122

@@ -16,6 +16,7 @@ public class SQLCiCd {
     public void applySQL() throws ClassNotFoundException {
         DatabaseConnection db = DatabaseConnection.postgres(
                 "localhost",
+                5432,
                 "postgres",
                 "postgres",
                 "pachhigares"
