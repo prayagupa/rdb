@@ -4,6 +4,10 @@ CREATE TABLE IF NOT EXISTS visiting_user(
     created timestamptz DEFAULT CURRENT_TIMESTAMP
 );
 
+-- https://www.postgresql.org/docs/current/sql-insert.html
+-- INSERT INTO visiting_user(user_id, user_name) VALUES(1, 'upadhyay') 
+-- ON CONFLICT (user_id) DO UPDATE SET user_name = excluded.user_name;
+
 CREATE TABLE IF NOT EXISTS museum_visit (
     user_id INT REFERENCES visiting_user(user_id),
     visit_id serial PRIMARY KEY,

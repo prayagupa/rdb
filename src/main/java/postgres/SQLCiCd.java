@@ -8,6 +8,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class SQLCiCd {
 
@@ -26,12 +29,12 @@ public class SQLCiCd {
         db.getConnection().map(connection -> {
             try {
                 Statement statement = connection.createStatement();
-                File[] files = lookupFolderDir.listFiles((dir, name) -> name.endsWith(".sql"));
+                File[] sqlFiles = lookupFolderDir.listFiles((dir, name) -> name.endsWith(".sql"));
 
                 char[] c = new char[1000];
 
-                for (var f : files) {
-                    var bufferedInputStream = new BufferedInputStream(new FileInputStream(f));
+                for (var sqlFile : sqlFiles) {
+                    var bufferedInputStream = new BufferedInputStream(new FileInputStream(sqlFile));
                     var destinationStream = new ByteArrayOutputStream();
 
                     int readMarker = bufferedInputStream.read();
@@ -43,9 +46,9 @@ public class SQLCiCd {
                     var sqlString = destinationStream.toString();
                     boolean executed = statement.execute(sqlString);
                     if (executed) {
-                        System.out.println("[INFO] SQL executed: " + sqlString);
+                        System.out.println("[INFO] SQL file " + sqlFile + " applied : " + sqlString);
                     } else {
-                        System.out.println("[ERROR] SQL failed: " + sqlString);
+                        System.out.println("[ERROR] SQL file " + sqlFile + " did not apply: " + sqlString);
                     }
 
                 }

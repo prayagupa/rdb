@@ -43,8 +43,9 @@ public class DatabaseConnection {
         config.setConnectionTimeout(1000);
         config.setIdleTimeout(10000);
         config.setMaximumPoolSize(2);
-        System.out.println("============= Created database config ============");
+        config.setMaximumPoolSize(20);
 
+        System.out.println("============= Created database config ============");
         connectionPool = new HikariDataSource(config);
         System.out.println("============= Created database pool ============");
     }

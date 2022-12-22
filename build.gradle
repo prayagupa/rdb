@@ -16,11 +16,10 @@ repositories {
 
 dependencies {
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
-    // TEST
-//    implementation group: 'org.postgresql', name: 'postgresql', version: '9.3-1101-jdbc41'
-    //implementation group: 'com.amazon.redshift', name: 'redshift-jdbc42', version: '2.1.0.3'
-
-    implementation group: 'com.zaxxer', name: 'HikariCP', version: '2.3.2'
+    // TEST older version
+    // implementation group: 'org.postgresql', name: 'postgresql', version: '9.3-1101-jdbc41'
+    // implementation group: 'com.amazon.redshift', name: 'redshift-jdbc42', version: '2.1.0.3'
+    implementation group: 'com.zaxxer', name: 'HikariCP', version: '3.4.5'
     implementation group: 'io.zonky.test', name: 'embedded-postgres', version: '1.2.10'
 
     implementation group: 'org.jdbi', name: 'jdbi3-core', version: '3.12.0'
