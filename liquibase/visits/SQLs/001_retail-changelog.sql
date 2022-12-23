@@ -1,8 +1,8 @@
 --liquibase formatted sql
 
---changeset your.name:1 labels:example-label context:example-context
---comment: example comment
-create table person (
+--changeset prayag.upa:1 labels:retail-store context:retail-store
+--comment: add person 
+create table IF NOT EXISTS person (
     id int primary key auto_increment not null,
     name varchar(50) not null,
     address1 varchar(50),
@@ -11,9 +11,9 @@ create table person (
 )
 --rollback DROP TABLE person;
 
---changeset your.name:2 labels:example-label context:example-context
---comment: example comment
-create table company (
+--changeset prayag.upa:2 labels:retail-store context:retail-store
+--comment: add company
+create table IF NOT EXISTS company (
     id int primary key auto_increment not null,
     name varchar(50) not null,
     address1 varchar(50),
@@ -22,8 +22,9 @@ create table company (
 )
 --rollback DROP TABLE company;
 
---changeset other.dev:3 labels:example-label context:example-context
---comment: example comment
+--changeset prayag.upa:3 labels:retail-store context:retail-store
+--comment: add country column
+
 alter table person add column country varchar(2)
 --rollback ALTER TABLE person DROP COLUMN country;
 
