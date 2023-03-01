@@ -22,6 +22,14 @@ Type "help" for help.
 ```
 
 ```
+postgres=> \list
+
+postgres=# \du
+                                    List of roles
+ Role name  |                         Attributes                         | Member of 
+------------+------------------------------------------------------------+-----------
+ postgres   | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+
 postgres=> SELECT current_database();
  current_database 
 ------------------

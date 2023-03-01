@@ -1,3 +1,4 @@
+-- 
 CREATE TABLE IF NOT EXISTS visiting_user(
     user_id serial PRIMARY KEY,
     user_name VARCHAR(255),
