@@ -40,12 +40,15 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_PASSWORD: pachhigares
+      - POSTGRES_PASSWORD=pachhigares
+      - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      ## - /data/postgres:/var/lib/postgresql/data/pgdata
-      ## - pg_local_volume:/var/lib/postgresql/data/pgdata
+      ## named volume in order to handle chwon issue
+      # rdb-local_pgdb-1  | chmod: changing permissions of '/var/lib/postgresql/data/pgdata': Read-only file system
+      #rdb-local_pgdb-1  | chown: changing ownership of '/var/lib/postgresql/data/pgdata': Read-only file system
+      #rdb-local_pgdb-1 exited with code 0
+      - pgdata_local_volume:/var/lib/postgresql/data/pgdata
       - ./db/pg:/docker-entrypoint-initdb.d
-      ## - pg_local_script_volume:/docker-entrypoint-initdb.d
     networks:
       - shared_network
     ports:
@@ -60,3 +63,12 @@ services:
 
 networks:
   shared_network: {}
+
+volumes:
+  pgdata_local_volume:
+  nfsmountdbdata:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: "$HOME/pg/pg-data/"
