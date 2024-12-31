@@ -37,18 +37,22 @@ services:
       - ./db:/docker-entrypoint-initdb.d/setup
 
   local_pgdb:
-    image: postgres
+    ## https://github.com/pgvector/pgvector?tab=readme-ov-file#docker
+    image: pgvector/pgvector:pg16
+    container_name: local_pgdb
     restart: always
     environment:
       - POSTGRES_PASSWORD=pachhigares
       - PGDATA=/var/lib/postgresql/data/pgdata
-    volumes:
+#    volumes:
       ## named volume in order to handle chwon issue
       # rdb-local_pgdb-1  | chmod: changing permissions of '/var/lib/postgresql/data/pgdata': Read-only file system
       #rdb-local_pgdb-1  | chown: changing ownership of '/var/lib/postgresql/data/pgdata': Read-only file system
       #rdb-local_pgdb-1 exited with code 0
-      - pgdata_local_volume:/var/lib/postgresql/data/pgdata
-      - ./db/pg:/docker-entrypoint-initdb.d
+#      - pgdata_local_volume_mount:/var/lib/postgresql/data/pgdata
+#      - ./db/pg:/docker-entrypoint-initdb.d
+# manually created volume
+#      - 351c9079bfa05a545ea6ee61a33be08cc762cfb0de5872f478cbb34c06a35863:/docker-entrypoint-initdb.d
     networks:
       - shared_network
     ports:
@@ -66,7 +70,7 @@ networks:
 
 volumes:
   pgdata_local_volume:
-  nfsmountdbdata:
+  pgdata_local_volume_mount:
     driver: local
     driver_opts:
       type: 'none'
