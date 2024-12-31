@@ -28,6 +28,9 @@ CREATE INDEX trgm_idx_review_text_search ON customer_reviews USING GIN (review_t
 CREATE INDEX trgm_idx_review_text ON customer_reviews USING GIN (review_text gin_trgm_ops);
 
 -- insert review data
+-- SELECT pg_size_pretty(pg_total_relation_size('customer_reviews')) AS total_size;
+-- 96Kb with indices of keywords
+
 INSERT INTO customer_reviews (customer_id, product_id, rating, review_text)
 VALUES (1, 101, 5, 'Amazing product! Highly recommend.');
 

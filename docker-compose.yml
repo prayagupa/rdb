@@ -59,11 +59,13 @@ services:
       - 5432:5432
 
   local_cdb:
-    image: cockroachdb/cockroach:v21.1.2
-    volumes:
-      - ./db/cdb:/docker-entrypoint-initdb.d
+    image: cockroachdb/cockroach:v24.3.2
+#    volumes:
+#      does not work with Lima
+#      - ./db/cdb:/docker-entrypoint-initdb.d
     ports:
         - 5555:5555
+    command: start-single-node --insecure
 
 networks:
   shared_network: {}
