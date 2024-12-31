@@ -21,6 +21,12 @@ tsvector_update_trigger(review_text_search, 'pg_catalog.english', review_text);
 CREATE INDEX idx_review_text_search ON customer_reviews
 USING GIN(review_text_search);
 
+-- Trigram for determining the similarity of alphanumeric text based on trigram matching
+-- https://www.postgresql.org/docs/current/pgtrgm.html
+CREATE EXTENSION pg_trgm;
+CREATE INDEX trgm_idx_review_text_search ON customer_reviews USING GIN (review_text_search);
+CREATE INDEX trgm_idx_review_text ON customer_reviews USING GIN (review_text gin_trgm_ops);
+
 -- insert review data
 INSERT INTO customer_reviews (customer_id, product_id, rating, review_text)
 VALUES (1, 101, 5, 'Amazing product! Highly recommend.');
@@ -32,17 +38,57 @@ INSERT INTO customer_reviews (customer_id, product_id, rating, review_text)
 VALUES (3, 101, 3, 'Average product. Does the job.');
 
 INSERT INTO customer_reviews (customer_id, product_id, rating, review_text)
-VALUES (4, 102, 2, 'Not satisfied with the performance.');
+VALUES (1, 102, 2, 'Not satisfied with the performance.');
 
 INSERT INTO customer_reviews (customer_id, product_id, rating, review_text)
-VALUES (5, 102, 1, 'Terrible! Would not buy again.');
+VALUES (2, 102, 1, 'Terrible! Would not buy again.');
 
 -- search by token that must exist like expensive
 -- searching by expens won't work
 SELECT * FROM customer_reviews
-WHERE review_text_search @@ to_tsquery('expensive');
+WHERE product_id = 101
+AND review_text_search @@ to_tsquery('Expensive');
 
 --
 SELECT * FROM customer_reviews
-WHERE product_id = 102
+WHERE product_id = 101
 AND review_text_search @@ to_tsquery('qual:*');
+
+SELECT * FROM customer_reviews
+WHERE product_id = 102
+AND review_text_search @@ to_tsquery('Terible');
+
+SET pg_trgm.similarity_threshold = 0.2;
+
+WITH keyword_search AS (
+    SELECT * FROM customer_reviews
+    WHERE review_text_search @@ to_tsquery('Terible')
+)
+SELECT * FROM keyword_search
+UNION ALL
+SELECT * FROM customer_reviews
+WHERE review_text % 'Terible'
+AND NOT EXISTS (SELECT 1 FROM keyword_search);
+
+
+-- fuzzy
+--SELECT similarity('Terible', 'Terrible');
+-- similarity
+--------------
+--        0.7
+
+--SELECT levenshtein('Terible', 'Terrible');
+-- levenshtein
+---------------
+--           1
+
+--postgres=# SELECT show_trgm('quality');
+--                show_trgm
+-------------------------------------------
+-- {"  q"," qu",ali,ity,lit,qua,"ty ",ual}
+
+--
+--SELECT word_similarity('qty', 'quality');
+-- word_similarity
+-------------------
+--            0.25
