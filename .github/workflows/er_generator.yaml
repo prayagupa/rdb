@@ -3,7 +3,7 @@ name: Generate UML Diagram
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   generate-uml:
