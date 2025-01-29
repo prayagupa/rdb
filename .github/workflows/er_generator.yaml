@@ -1,0 +1,29 @@
+name: Generate UML Diagram
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate-uml:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build Docker image
+      run: docker build . -t upadhyay/erd
+      
+    - name: Create container and copy UML diagram
+      run: |
+        id=$(docker create upadhyay/erd)
+        docker cp $id:/erd/schema.png .
+        docker rm -v $id
+
+    - name: Upload UML diagram
+      uses: actions/upload-artifact@v2
+      with:
+        name: UML Diagram
+        path: schema.png
