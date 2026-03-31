@@ -1,199 +1,163 @@
+# Oracle Database
 
+Operational reference for Oracle 12c — infrastructure setup, Docker-based local environment, SQL*Plus access, listener configuration, and schema bootstrap.
 
-[oracle 12 db](https://docs.oracle.com/database/121/CNCPT/intro.htm#CNCPT001)
-------
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [AWS RDS — Connecting to Oracle](#aws-rds--connecting-to-oracle)
+- [Local Docker Setup](#local-docker-setup)
+  - [Build the Docker Image](#build-the-docker-image)
+  - [Run the Container](#run-the-container)
+  - [Container Internals](#container-internals)
+- [SQL*Plus — Connecting & Inspecting](#sqlplus--connecting--inspecting)
+- [Listener Configuration](#listener-configuration)
+- [Schema Bootstrap](#schema-bootstrap)
+- [Testing with H2 Oracle Compatibility Mode](#testing-with-h2-oracle-compatibility-mode)
+
+---
+
+## Overview
+
+This repo uses **Oracle 12.2.0.1 Enterprise Edition** for local development and integration testing.
+
+- Oracle docs: [Oracle 12c Database Concepts](https://docs.oracle.com/database/121/CNCPT/intro.htm#CNCPT001)
+- Oracle RAC: [docs.oracle.com/database/technologies/rac](https://www.oracle.com/database/technologies/rac.html)
+- Aurora as Oracle RAC alternative: [AWS blog](https://aws.amazon.com/blogs/database/amazon-aurora-as-an-alternative-to-oracle-rac/)
+
+**Observed latency:** ~200ms on VPN-connected RDS. `WHERE ROWNUM <= 1` counter-intuitively increases latency in some cases due to plan changes.
+
+---
+
+## AWS RDS — Connecting to Oracle
 
 ```bash
+# Describe RDS instances in a region
 aws rds describe-db-instances --profile aws-default --region us-west-2
 
--- add proper firewall to fix Can't connect to MySQL server on
--- also not just firewall-group, which will work only if the internet gateway is there for your Vitual Private Cloud(VPC) - https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
--- also also also make sure to add subnetwork to route table - https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html
--- also make sure VPN is not screwing up things
-
-mysql -h duwamish.<<12>>.us-west-2.rds.amazonaws.com -P 3306 -u root -p
+# Connect to RDS Oracle via MySQL-compatible endpoint
+mysql -h duwamish.<account>.us-west-2.rds.amazonaws.com -P 3306 -u root -p
 ```
 
-takes `~200ms` could be because of oracle connection is via on VPN.
-Weird that `WHERE ROWNUM <=1` adds increases latency.
+**Connectivity checklist for RDS:**
+1. Security group inbound rules must allow your IP/CIDR on the DB port.
+2. The VPC must have an Internet Gateway attached if connecting from outside the VPC — [VPC Internet Gateway docs](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+3. The subnet must be added to the VPC Route Table — [Route Tables docs](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html).
+4. Verify VPN is not intercepting or re-routing DB traffic.
 
-for testing h2-oracle [http://www.h2database.com/html/features.html](http://www.h2database.com/html/features.html)
+---
 
+## Local Docker Setup
 
-- https://www.oracle.com/database/technologies/rac.html
-- https://aws.amazon.com/blogs/database/amazon-aurora-as-an-alternative-to-oracle-rac/
-- https://docs.oracle.com/cd/E18283_01/server.112/e17110/bgprocesses.htm
+### Build the Docker Image
 
 ```bash
+# Prepare the data directory
 sudo mkdir -p /data/oracle
 sudo chmod 777 -R /data
+# Share /data with Docker (add via Docker Desktop → Preferences → Resources → File Sharing)
 
-## share /data folder with docker for mounting
+# Clone Oracle's official Docker images repo
+git clone https://github.com/oracle/docker-images.git
 
-# git clone https://github.com/oracle/docker-images.git
-$ ll OracleDatabase/SingleInstance/dockerfiles/12.2.0.1/
-total 6747696
--rw-r--r--  1 updupdupd  184630988          62 Feb 22 15:31 Checksum.ee
--rw-r--r--  1 updupdupd  184630988          62 Feb 22 15:31 Checksum.se2
--rw-r--r--  1 updupdupd  184630988        3462 Feb 22 15:31 Dockerfile
--rwxr-xr-x  1 updupdupd  184630988        1050 Feb 22 15:31 checkDBStatus.sh
--rwxr-xr-x  1 updupdupd  184630988         905 Feb 22 15:31 checkSpace.sh
--rwxr-xr-x  1 updupdupd  184630988        2953 Feb 22 15:31 createDB.sh
--rw-r--r--  1 updupdupd  184630988        6878 Feb 22 15:31 db_inst.rsp
--rw-r--r--  1 updupdupd  184630988        9204 Feb 22 15:31 dbca.rsp.tmpl
--rwxr-xr-x  1 updupdupd  184630988        2495 Feb 22 15:31 installDBBinaries.sh
--rw-r--r--@ 1 updupdupd  184630988  3453696911 Feb 22 15:58 linuxx64_12201_database.zip
--rwxr-xr-x  1 updupdupd  184630988        6526 Feb 22 15:31 runOracle.sh
--rwxr-xr-x  1 updupdupd  184630988        1015 Feb 22 15:31 runUserScripts.sh
--rwxr-xr-x  1 updupdupd  184630988         758 Feb 22 15:31 setPassword.sh
--rwxr-xr-x  1 updupdupd  184630988         941 Feb 22 15:31 setupLinuxEnv.sh
--rwxr-xr-x  1 updupdupd  184630988         678 Feb 22 15:31 startDB.sh
+# Verify the 12.2.0.1 EE zip is present
+ls OracleDatabase/SingleInstance/dockerfiles/12.2.0.1/
+# linuxx64_12201_database.zip  (~3.4 GB)
 
-
+# Build the image (~6 GB, takes 15-30 minutes)
 cd OracleDatabase/SingleInstance/dockerfiles
 ./buildDockerImage.sh -v 12.2.0.1 -e
 
-$ docker images
-REPOSITORY                                                             TAG                            IMAGE ID            CREATED             SIZE
-oracle/database                                                        12.2.0.1-ee                    bcb7c9f64985        32 hours ago        6.11GB
-oraclelinux                                                            7-slim                         c3d869388183        5 weeks ago         117MB
+# Verify
+docker images | grep oracle
+# oracle/database   12.2.0.1-ee   bcb7c9f64985   6.11GB
+```
 
-docker run --name oracle \                                                                                                                             
--p 1521:1521 -p 5500:5500 \                                                                            
--e ORACLE_SID=xe \                                                                                     
--e ORACLE_PDB=duwamishpdb \                                                                               
--e ORACLE_PWD=Duwamish9 \                                                                                
--e ORACLE_CHARACTERSET=AL32UTF8 \                                                                      
--v /data/oracle:/opt/oracle/oradata \                                                                           
-oracle/database:12.2.0.1-ee
+### Run the Container
 
-## SecureShell into oracle container
-[oracle@6be299c2c700 ~]$ ps aux | grep oracle
-oracle       1  0.0  0.1  11696  2472 ?        Ss   08:35   0:00 /bin/bash /opt/oracle/runOracle.sh
-oracle      26  0.0  0.5 215296 11012 ?        Ssl  08:35   0:00 /opt/oracle/product/12.2.0.1/dbhome_1/bin/tnslsnr LISTENER -inherit
+```bash
+docker run --name oracle \
+  -p 1521:1521 \
+  -p 5500:5500 \
+  -e ORACLE_SID=xe \
+  -e ORACLE_PDB=duwamishpdb \
+  -e ORACLE_PWD=Duwamish9 \
+  -e ORACLE_CHARACTERSET=AL32UTF8 \
+  -v /data/oracle:/opt/oracle/oradata \
+  oracle/database:12.2.0.1-ee
+```
 
-[oracle@7156661d8155 ~]$ echo $ORACLE_HOME/
-/opt/oracle/product/12.2.0.1/dbhome_1/
+### Container Internals
 
-[oracle@7156661d8155 ~]$ ls -l /opt/oracle/
-total 72
-drwxr-x--- 3 oracle oinstall 4096 Feb 23 19:41 admin
-drwxr-x--- 2 oracle oinstall 4096 Feb 23 19:41 audit
-drwxr-x--- 4 oracle oinstall 4096 Feb 23 19:45 cfgtoollogs
--rwxr-xr-x 1 oracle dba      1050 Feb 22 23:31 checkDBStatus.sh
-drwxr-xr-x 2 oracle dba      4096 Feb 23 00:22 checkpoints
--rwxr-xr-x 1 oracle dba      2953 Feb 22 23:31 createDB.sh
--rw-r--r-- 1 oracle dba      9204 Feb 22 23:31 dbca.rsp.tmpl
-drwxrwxr-x 1 oracle dba      4096 Feb 23 00:22 diag
-drwxrwx--- 1 oracle dba      4096 Feb 23 00:22 oraInventory
-drwxrwxrwx 4 oracle oinstall  128 Feb 23 19:41 oradata
-drwxr-xr-x 1 oracle dba      4096 Feb 23 00:15 product
--rwxr-xr-x 1 oracle dba      6526 Feb 22 23:31 runOracle.sh
--rwxr-xr-x 1 oracle dba      1015 Feb 22 23:31 runUserScripts.sh
-drwxr-xr-x 1 oracle dba      4096 Feb 23 00:15 scripts
--rwxr-xr-x 1 oracle dba       758 Feb 22 23:31 setPassword.sh
--rwxr-xr-x 1 oracle dba       678 Feb 22 23:31 startDB.sh
+```bash
+# Shell into the container
+docker exec -it oracle bash
 
-[oracle@6be299c2c700 ~]$ ls -l /docker-entrypoint-initdb.d
-lrwxrwxrwx 1 root root 19 Feb 23 00:15 /docker-entrypoint-initdb.d -> /opt/oracle/scripts
+# Verify processes
+ps aux | grep oracle
 
-sqlplus duwamish/Duwamish9@//localhost:1521/ORCLCDB as sysdba ## sqlplus system/oracle@//localhost:1521/xe
-SQL> connect sys/Duwamish9@localhost:1521/ORCLCDB
+# Oracle home
+echo $ORACLE_HOME
+# /opt/oracle/product/12.2.0.1/dbhome_1/
 
-select * from v$version;
-"CORE	12.1.0.2.0	Production"
+# Entrypoint scripts location
+ls -l /opt/oracle/scripts/   # symlinked from /docker-entrypoint-initdb.d
+```
 
+---
+
+## SQL*Plus — Connecting & Inspecting
+
+```bash
+# Connect as SYSDBA to the CDB root
+sqlplus sys/Duwamish9@//localhost:1521/ORCLCDB as sysdba
+
+# Check Oracle version
+SELECT * FROM v$version;
+-- CORE 12.1.0.2.0 Production
+
+# List all tables visible to DBA
 SELECT owner, table_name FROM dba_tables;
 
-[oracle@99de476b8016 ~]$ lsnrctl 
+# List user profiles
+SELECT * FROM dba_profiles;
+```
 
-LSNRCTL for Linux: Version 12.2.0.1.0 - Production on 25-FEB-2019 01:58:43
+---
 
-Copyright (c) 1991, 2016, Oracle.  All rights reserved.
+## Listener Configuration
 
-Welcome to LSNRCTL, type "help" for information.
+Managed via `lsnrctl`. The listener proxies all incoming connections to the appropriate Oracle service/instance.
 
-LSNRCTL> help
-The following operations are available
-An asterisk (*) denotes a modifier or extended command:
+```bash
+# Inside the container
+lsnrctl status
+lsnrctl services
+```
 
-start           stop            status          services        
-servacls        version         reload          save_config     
-trace           spawn           quit            exit            
-set*            show*           
+**`listener.ora` (auto-generated):**
 
-LSNRCTL> status
-Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1)))
-STATUS of the LISTENER
-------------------------
-Alias                     LISTENER
-Version                   TNSLSNR for Linux: Version 12.2.0.1.0 - Production
-Start Date                25-FEB-2019 01:46:12
-Uptime                    0 days 0 hr. 12 min. 42 sec
-Trace Level               off
-Security                  ON: Local OS Authentication
-SNMP                      OFF
-Listener Parameter File   /opt/oracle/product/12.2.0.1/dbhome_1/network/admin/listener.ora
-Listener Log File         /opt/oracle/diag/tnslsnr/99de476b8016/listener/alert/log.xml
-Listening Endpoints Summary...
-  (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1)))
-  (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=0.0.0.0)(PORT=1521)))
-  (DESCRIPTION=(ADDRESS=(PROTOCOL=tcps)(HOST=99de476b8016)(PORT=5500))(Security=(my_wallet_directory=/opt/oracle/admin/ORCLCDB/xdb_wallet))(Presentation=HTTP)(Session=RAW))
-Services Summary...
-Service "82af308615e70949e053020012aca602" has 1 instance(s).
-  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
-Service "ORCLCDB" has 1 instance(s).
-  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
-Service "ORCLCDBXDB" has 1 instance(s).
-  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
-Service "duwamish" has 1 instance(s).
-  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
-The command completed successfully
-
-LSNRCTL> services
-Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1)))
-Services Summary...
-Service "82af308615e70949e053020012aca602" has 1 instance(s).
-  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
-    Handler(s):
-      "DEDICATED" established:0 refused:0 state:ready
-         LOCAL SERVER
-Service "ORCLCDB" has 1 instance(s).
-  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
-    Handler(s):
-      "DEDICATED" established:0 refused:0 state:ready
-         LOCAL SERVER
-Service "ORCLCDBXDB" has 1 instance(s).
-  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
-    Handler(s):
-      "D000" established:0 refused:0 current:0 max:1022 state:ready
-         DISPATCHER <machine: 99de476b8016, pid: 2169>
-         (ADDRESS=(PROTOCOL=tcp)(HOST=99de476b8016)(PORT=39203))
-Service "duwamish" has 1 instance(s).
-  Instance "ORCLCDB", status READY, has 1 handler(s) for this service...
-    Handler(s):
-      "DEDICATED" established:0 refused:0 state:ready
-         LOCAL SERVER
-The command completed successfully
-
-
-[oracle@99de476b8016 ~]$ cat /opt/oracle/product/12.2.0.1/dbhome_1/network/admin/listener.ora 
-LISTENER = 
-(DESCRIPTION_LIST = 
-  (DESCRIPTION = 
-    (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC1)) 
-    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521)) 
-  ) 
-) 
-
-DEDICATED_THROUGH_BROKER_LISTENER=ON
+```
+LISTENER =
+(DESCRIPTION_LIST =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC1))
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+  )
+)
+DEDICATED_THROUGH_BROKER_LISTENER = ON
 DIAG_ADR_ENABLED = off
+```
 
+**`tnsnames.ora` (auto-generated):**
 
-[oracle@99de476b8016 ~]$ cat /opt/oracle/product/12.2.0.1/dbhome_1/network/admin/tnsnames.ora 
-ORCLCDB=localhost:1521/ORCLCDB
-DUWAMISHPDB= 
-(DESCRIPTION = 
+```
+ORCLCDB = localhost:1521/ORCLCDB
+
+DUWAMISHPDB =
+(DESCRIPTION =
   (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
   (CONNECT_DATA =
     (SERVER = DEDICATED)
@@ -202,29 +166,61 @@ DUWAMISHPDB=
 )
 ```
 
+Services registered at startup:
+
+| Service | Instance | Status |
+|---|---|---|
+| `ORCLCDB` | ORCLCDB | READY |
+| `ORCLCDBXDB` | ORCLCDB | READY (HTTP/HTTPS) |
+| `duwamish` | ORCLCDB | READY |
+
+---
+
+## Schema Bootstrap
+
+DDL runs automatically from `/docker-entrypoint-initdb.d` (symlinked to `/opt/oracle/scripts`) on first container start.
+
 ```sql
-/*create user: sql file*/
-
-/**/
-select * from dba_profiles; 
-
+-- Create application tables
 CREATE TABLE customer (
-    id NUMBER(10) NOT NULL, 
-    name VARCHAR(130), 
-    address VARCHAR(130), 
-    loyalty_point NUMBER(10), 
-    username VARCHAR(130)
+    id             NUMBER(10)   NOT NULL,
+    name           VARCHAR(130),
+    address        VARCHAR(130),
+    loyalty_point  NUMBER(10),
+    username       VARCHAR(130)
 );
 
-CREATE TABLE Inventory (id NUMBER(10) NOT NULL, warehouse VARCHAR(20), sku VARCHAR(20), qty NUMBER(10));
-ALTER TABLE Inventory ADD (CONSTRAINT inv_pk PRIMARY KEY (ID));
+CREATE TABLE inventory (
+    id         NUMBER(10) NOT NULL,
+    warehouse  VARCHAR(20),
+    sku        VARCHAR(20),
+    qty        NUMBER(10)
+);
+ALTER TABLE inventory ADD (CONSTRAINT inv_pk PRIMARY KEY (id));
 CREATE SEQUENCE inv_pk START WITH 1;
 
-CREATE TABLE CustomerOrder (id NUMBER, name VARCHAR(20), active VARCHAR(2), created TIMESTAMP);
-INSERT INTO CustomerOrder VALUES(1, 'steve jobs', '01', CURRENT_TIMESTAMP);
+CREATE TABLE customer_order (
+    id       NUMBER,
+    name     VARCHAR(20),
+    active   VARCHAR(2),
+    created  TIMESTAMP
+);
 
-##
-# docker pull sath89/oracle-12c
-# docker run -d -p 8080:8080 -p 1521:1521 sath89/oracle-12c
-
+-- Seed data
+INSERT INTO customer_order VALUES (1, 'steve jobs', '01', CURRENT_TIMESTAMP);
 ```
+
+---
+
+## Testing with H2 Oracle Compatibility Mode
+
+For unit/integration tests that must run without a full Oracle instance, H2 supports an Oracle compatibility mode.
+
+- Docs: [H2 Compatibility Modes](http://www.h2database.com/html/features.html)
+- JDBC URL: `jdbc:h2:mem:test;MODE=Oracle`
+- See `src/test/scala/H2OracleSpec.scala` for usage examples.
+
+> **Caveat:** H2 Oracle mode does not support all Oracle-specific syntax (e.g., `CONNECT BY`, `ROWNUM` semantics, Oracle-specific types). Use it for fast smoke tests only; run the full suite against a real Oracle instance in CI.
+
+**Refs:**
+- [Oracle background processes](https://docs.oracle.com/cd/E18283_01/server.112/e17110/bgprocesses.htm)

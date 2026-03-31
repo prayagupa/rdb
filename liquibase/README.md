@@ -1,157 +1,183 @@
+# Liquibase — Database Change Management
 
-- cd liquibase/visits
-- CICD in dev: https://www.liquibase.org/get-started/running-your-first-update
+Reference for using Liquibase to manage schema migrations across environments (dev → integration → production).
 
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Setup](#setup)
+- [Core Commands](#core-commands)
+  - [update](#update)
+  - [rollback](#rollback)
+  - [diff](#diff)
+- [Multi-Environment Promotion](#multi-environment-promotion)
+- [Changelog Format](#changelog-format)
+- [Verification](#verification)
+- [Refs](#refs)
+
+---
+
+## Overview
+
+Liquibase tracks every schema change as an ordered, versioned **changeset**. Each changeset is identified by `id`, `author`, and `filename`. Once applied, it is recorded in the `DATABASECHANGELOG` table — Liquibase will never re-run it.
+
+**Why this matters at scale:**
+- Schema changes are **auditable** — every change has an author, timestamp, and checksum.
+- Changes are **environment-aware** — promote the same changelog from dev → staging → prod with confidence.
+- **Rollback** is first-class — Liquibase generates or executes rollback SQL automatically.
+
+Working directory: `liquibase/visits/`
+
+---
+
+## Setup
+
+```bash
+cd liquibase/visits
+
+# H2 web console (for local dev)
+./start-h2
+# UI available at http://localhost:8080/frame.jsp
 ```
-$ liquibase update
-####################################################
-##   _     _             _ _                      ##
-##  | |   (_)           (_) |                     ##
-##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
-##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
-##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
-##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
-##              | |                               ##
-##              |_|                               ##
-##                                                ## 
-##  Get documentation at docs.liquibase.com       ##
-##  Get certified courses at learn.liquibase.com  ## 
-##  Free schema change activity reports at        ##
-##      https://hub.liquibase.com                 ##
-##                                                ##
-####################################################
-Starting Liquibase at 15:53:17 (version 4.18.0 #5864 built at 2022-12-02 18:02+0000)
-Liquibase Version: 4.18.0
-Liquibase Community 4.18.0 by Liquibase
+
+Configuration files:
+
+| File | Purpose |
+|---|---|
+| `liquibase.properties` | Default JDBC URL, credentials, changelog path |
+| `liquibase.psql.conf` | PostgreSQL-specific overrides |
+| `liquibase.sqlcmd.conf` | SQL Server overrides |
+| `liquibase.sqlplus.conf` | Oracle SQL*Plus overrides |
+| `liquibase.flowfile.yaml` | Declarative flow for multi-step operations |
+
+---
+
+## Core Commands
+
+### update
+
+Applies all pending changesets from the changelog to the target database.
+
+```bash
+liquibase update
+```
+
+**Sample output:**
+```
 Running Changeset: retail-changelog.sql::1::prayag.upa
 Running Changeset: retail-changelog.sql::2::prayag.upa
 Running Changeset: retail-changelog.sql::3::prayag.upa
 Liquibase command 'update' was executed successfully.
-
 ```
 
-- check http://localhost:8080/frame.jsp?jsessionid=30f3328bf193e4be0f5181e89c7f87c2
-- verify SQL
-```
-select * from databasechangelog;
-```
+### rollback
 
-- promote: 
-```
-liquibase --url=jdbc:h2:tcp://localhost:9090/mem:integration update
-```
+Reverts the last N changesets. Requires rollback SQL in the changeset definition or Liquibase-generated DDL.
 
-- rollback: https://docs.liquibase.com/workflows/liquibase-community/using-rollback.html
-
-```sql
+```bash
+# Roll back the last 2 changesets
 liquibase rollbackCount 2
 ```
 
+- [Rollback docs](https://docs.liquibase.com/workflows/liquibase-community/using-rollback.html)
 
-- diff https://www.liquibase.org/get-started/developer-workflow
+### diff
 
-```sql
+Compares two databases and reports schema differences — missing tables, columns, indexes, constraints.
+
+```bash
 liquibase diff
-####################################################
-##   _     _             _ _                      ##
-##  | |   (_)           (_) |                     ##
-##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
-##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
-##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
-##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
-##              | |                               ##
-##              |_|                               ##
-##                                                ## 
-##  Get documentation at docs.liquibase.com       ##
-##  Get certified courses at learn.liquibase.com  ## 
-##  Free schema change activity reports at        ##
-##      https://hub.liquibase.com                 ##
-##                                                ##
-####################################################
-Starting Liquibase at 16:29:17 (version 4.18.0 #5864 built at 2022-12-02 18:02+0000)
-Liquibase Version: 4.18.0
-Liquibase Community 4.18.0 by Liquibase
-
-Diff Results:
-Reference Database: DBUSER @ jdbc:h2:tcp://localhost:9090/mem:integration (Default Schema: PUBLIC)
-Comparison Database: DBUSER @ jdbc:h2:tcp://localhost:9090/mem:dev (Default Schema: PUBLIC)
-Compared Schemas: PUBLIC
-Product Name: EQUAL
-Product Version: EQUAL
-Missing Catalog(s): NONE
-Unexpected Catalog(s): NONE
-Changed Catalog(s): 
-     INTEGRATION
-          name changed from 'INTEGRATION' to 'DEV'
-Missing Column(s): NONE
-Unexpected Column(s): 
-     PUBLIC.COMPANY.ADDRESS1
-     PUBLIC.PERSON.ADDRESS1
-     PUBLIC.COMPANY.ADDRESS2
-     PUBLIC.PERSON.ADDRESS2
-     PUBLIC.DATABASECHANGELOG.AUTHOR
-     PUBLIC.COMPANY.CITY
-     PUBLIC.PERSON.CITY
-     PUBLIC.DATABASECHANGELOG.COMMENTS
-     PUBLIC.DATABASECHANGELOG.CONTEXTS
-     PUBLIC.PERSON.COUNTRY
-     PUBLIC.DATABASECHANGELOG.DATEEXECUTED
-     PUBLIC.DATABASECHANGELOG.DEPLOYMENT_ID
-     PUBLIC.DATABASECHANGELOG.DESCRIPTION
-     PUBLIC.DATABASECHANGELOG.EXECTYPE
-     PUBLIC.DATABASECHANGELOG.FILENAME
-     PUBLIC.COMPANY.ID
-     PUBLIC.DATABASECHANGELOG.ID
-     PUBLIC.DATABASECHANGELOGLOCK.ID
-     PUBLIC.PERSON.ID
-     PUBLIC.DATABASECHANGELOG.LABELS
-     PUBLIC.DATABASECHANGELOG.LIQUIBASE
-     PUBLIC.DATABASECHANGELOGLOCK.LOCKED
-     PUBLIC.DATABASECHANGELOGLOCK.LOCKEDBY
-     PUBLIC.DATABASECHANGELOGLOCK.LOCKGRANTED
-     PUBLIC.DATABASECHANGELOG.MD5SUM
-     PUBLIC.COMPANY.NAME
-     PUBLIC.PERSON.NAME
-     PUBLIC.DATABASECHANGELOG.ORDEREXECUTED
-     PUBLIC.PERSON.STATE
-     PUBLIC.DATABASECHANGELOG.TAG
-Changed Column(s): NONE
-Missing Foreign Key(s): NONE
-Unexpected Foreign Key(s): NONE
-Changed Foreign Key(s): NONE
-Missing Index(s): NONE
-Unexpected Index(s): 
-     PRIMARY_KEY_6 UNIQUE  ON PUBLIC.COMPANY(ID)
-     PRIMARY_KEY_67B UNIQUE  ON PUBLIC.PERSON(ID)
-     PRIMARY_KEY_D UNIQUE  ON PUBLIC.DATABASECHANGELOGLOCK(ID)
-Changed Index(s): NONE
-Missing Primary Key(s): NONE
-Unexpected Primary Key(s): 
-     CONSTRAINT_6 on PUBLIC.COMPANY(ID)
-     CONSTRAINT_8 on PUBLIC.PERSON(ID)
-     PK_DATABASECHANGELOGLOCK on PUBLIC.DATABASECHANGELOGLOCK(ID)
-Changed Primary Key(s): NONE
-Missing Schema(s): NONE
-Unexpected Schema(s): NONE
-Changed Schema(s): NONE
-Missing Sequence(s): NONE
-Unexpected Sequence(s): NONE
-Changed Sequence(s): NONE
-Missing Table(s): NONE
-Unexpected Table(s): 
-     COMPANY
-     DATABASECHANGELOG
-     DATABASECHANGELOGLOCK
-     PERSON
-Changed Table(s): NONE
-Missing Unique Constraint(s): NONE
-Unexpected Unique Constraint(s): NONE
-Changed Unique Constraint(s): NONE
-Missing View(s): NONE
-Unexpected View(s): NONE
-Changed View(s): NONE
-Liquibase command 'diff' was executed successfully.
 ```
 
+**Sample diff output (integration vs dev):**
 
-- https://docs.liquibase.com/workflows/liquibase-community/migrate-with-sql.html?_ga=2.181088999.1317746150.1671730403-1851318663.1671730403
+```
+Reference Database: DBUSER @ jdbc:h2:tcp://localhost:9090/mem:integration
+Comparison Database: DBUSER @ jdbc:h2:tcp://localhost:9090/mem:dev
+
+Unexpected Columns:
+  PUBLIC.COMPANY.ADDRESS1, PUBLIC.COMPANY.ADDRESS2
+  PUBLIC.PERSON.ADDRESS1,  PUBLIC.PERSON.ADDRESS2, PUBLIC.PERSON.COUNTRY, PUBLIC.PERSON.STATE
+
+Unexpected Tables:
+  COMPANY, DATABASECHANGELOG, DATABASECHANGELOGLOCK, PERSON
+
+Unexpected Primary Keys:
+  CONSTRAINT_6 on PUBLIC.COMPANY(ID)
+  CONSTRAINT_8 on PUBLIC.PERSON(ID)
+```
+
+Use `diff` to audit what has been applied to one environment but not yet promoted to another.
+
+---
+
+## Multi-Environment Promotion
+
+Liquibase uses the same changelog across all environments. Override the JDBC URL via flag or config file.
+
+```bash
+# Apply to integration database
+liquibase --url=jdbc:h2:tcp://localhost:9090/mem:integration update
+
+# Apply to production (example)
+liquibase \
+  --url=jdbc:postgresql://prod-host:5432/mydb \
+  --username=dbuser \
+  --password=$DB_PASS \
+  update
+```
+
+**Promotion flow:**
+
+```
+dev  →  [liquibase update]  →  integration  →  [liquibase update]  →  production
+         (H2 local)                              (PostgreSQL RDS)
+```
+
+---
+
+## Changelog Format
+
+Changesets can be written in SQL, XML, YAML, or JSON. This repo uses SQL with Liquibase-formatted comments.
+
+```sql
+-- liquibase formatted sql
+
+-- changeset prayag.upa:1
+CREATE TABLE company (
+    id    INT          NOT NULL PRIMARY KEY,
+    name  VARCHAR(255) NOT NULL
+);
+
+-- rollback DROP TABLE company;
+
+-- changeset prayag.upa:2
+ALTER TABLE company ADD COLUMN address1 VARCHAR(255);
+
+-- rollback ALTER TABLE company DROP COLUMN address1;
+```
+
+- [SQL migration guide (Liquibase docs)](https://docs.liquibase.com/workflows/liquibase-community/migrate-with-sql.html)
+
+---
+
+## Verification
+
+After `liquibase update`, verify applied changesets in the audit table:
+
+```sql
+SELECT id, author, filename, dateexecuted, exectype, md5sum
+FROM databasechangelog
+ORDER BY orderexecuted;
+```
+
+---
+
+## Refs
+
+- [Liquibase getting started](https://www.liquibase.org/get-started/running-your-first-update)
+- [Developer workflow](https://www.liquibase.org/get-started/developer-workflow)
+- [Rollback workflows](https://docs.liquibase.com/workflows/liquibase-community/using-rollback.html)
+- [SQL migration format](https://docs.liquibase.com/workflows/liquibase-community/migrate-with-sql.html)

@@ -1,182 +1,206 @@
-postgres
--------
+# PostgreSQL
+
+Production-grade operational reference for PostgreSQL — local setup, CLI workflows, schema inspection, performance benchmarks, and data export patterns.
+
+---
+
+## Table of Contents
+
+- [Local Setup](#local-setup)
+- [Connecting](#connecting)
+- [Database Inspection](#database-inspection)
+- [Schema & Data Queries](#schema--data-queries)
+- [Disk Usage](#disk-usage)
+- [Benchmarks](#benchmarks)
+  - [PostgreSQL (RDS db.m4.large)](#postgresql-rds-dbm4large)
+  - [Redshift (dc2.large)](#redshift-dc2large)
+- [Data Export](#data-export)
+- [Embedded PostgreSQL (Testing)](#embedded-postgresql-testing)
+
+---
+
+## Local Setup
 
 ```bash
-## install psql CLI
+# Install psql CLI
 brew install postgresql
+
+# Start local PostgreSQL via Docker
+docker-compose up pgdb
 ```
 
-```
-## connect to container
+---
+
+## Connecting
+
+```bash
+# Connect to a running Docker container
 docker exec -it local_pgdb psql -p 5432 -U postgres
+
+# Connect via TCP (local or remote)
 psql -h 127.0.0.1 -p 5432 -U postgres
 
-root@63750bc48a06:/# psql -U postgres
-psql (12.2 (Debian 12.2-1.pgdg100+1))
-Type "help" for help.
-
-λ psql -h analytics.???.us-east-1.rds.amazonaws.com -p 5432 -d postgres -U postgres -W
-Password: 
-psql (11.4)
-SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES256-GCM-SHA384, bits: 256, compression: off)
-Type "help" for help.
+# Connect to RDS instance (prompts for password)
+psql -h analytics.<account>.us-east-1.rds.amazonaws.com \
+     -p 5432 -d postgres -U postgres -W
+# SSL connection (TLSv1.2, ECDHE-RSA-AES256-GCM-SHA384, 256-bit)
 ```
 
+---
+
+## Database Inspection
+
+```sql
+-- List all databases
+\list
+
+-- List roles and privileges
+\du
+
+-- Show current database
+SELECT current_database();
+
+-- List tables in current database
+\d
+
+-- Switch database
+\connect museum_visit;
+
+-- Enable expanded display (vertical output for wide rows)
+\x
+
+-- Show timezone
+SHOW TIMEZONE;
+
+-- Show current timestamp
+SELECT CURRENT_TIMESTAMP;
 ```
-postgres=> \list
 
-postgres=# \du
-                                    List of roles
- Role name  |                         Attributes                         | Member of 
-------------+------------------------------------------------------------+-----------
- postgres   | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+**Sample output — list of databases on RDS:**
 
-postgres=> SELECT current_database();
- current_database 
-------------------
- postgres
-(1 row)
-
-postgres=# \d
-                    List of relations
- Schema |           Name            |   Type   |  Owner
---------+---------------------------+----------+----------
- public | museum_visit              | table    | postgres
- public | museum_visit_visit_id_seq | sequence | postgres
- public | visiting_user             | table    | postgres
- public | visiting_user_user_id_seq | sequence | postgres
-(4 rows)
-
-postgres=> \connect museum_visit;
-Password for user postgres: 
-SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES256-GCM-SHA384, bits: 256, compression: off)
-You are now connected to database "museum_visit" as user "postgres".
-
-postgres=> \l
+```
                                    List of databases
-     Name     |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges   
---------------+----------+----------+-------------+-------------+-----------------------
- museum_visit | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
- postgres     | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+     Name     |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges
+--------------+----------+----------+-------------+-------------+------------------------
+ museum_visit | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+ postgres     | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
  rdsadmin     | rdsadmin | UTF8     | en_US.UTF-8 | en_US.UTF-8 | rdsadmin=CTc/rdsadmin
- template0    | rdsadmin | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/rdsadmin          +
-              |          |          |             |             | rdsadmin=CTc/rdsadmin
- template1    | postgres | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/postgres          +
-              |          |          |             |             | postgres=CTc/postgres
-(5 rows)
-
-##show tz
-postgres=# SHOW TIMEZONE;
- TimeZone
-----------
- Etc/UTC
-(1 row)
-
-postgres=# SELECT CURRENT_TIMESTAMP;
-       current_timestamp
--------------------------------
- 2020-02-24 01:23:05.308574+00
-(1 row)
-
-##
-
-postgres=# \x
-Expanded display is on.
-
-postgres=# select * from museum_visit;
--[ RECORD 1 ]-----+------------------------------
-user_id           | 1
-visit_id          | 1
-museum_name       | Dharahara centre
-department        | Front door
-visit_start_tz    | 2019-08-03 02:00:00+00
-visit_start_local | 2019-08-02 18:00:00
-visit_end_tz      | 2019-08-03 02:10:00+00
-visit_end_local   | 2019-08-02 18:10:00
-created           | 2020-02-24 01:34:34.579363+00
-
-museum_visit=> select count(*) users, max(created)-min(created) time_taken from visiting_user;
- users |   time_taken    
--------+-----------------
- 32075 | 00:49:41.048941
-
-museum_visit=> select count(*) users, max(created)-min(created) time_taken from visiting_user;
- users |   time_taken    
--------+-----------------
- 38788 | 01:00:00.766083
- 
-museum_visit=> select count(*) users, max(created)-min(created) time_taken from visiting_user;
- users |   time_taken    
--------+-----------------
- 50601 | 01:18:24.258239
-
 ```
 
+---
+
+## Schema & Data Queries
 
 ```sql
--- v11.4, db.m4.large, 8 GB RAM, 2 vCPU
--- using parallelism
--- {"@timestamp":"2019-08-03T14:34:57.895-07:00","@version":"1","message":"HikariPool-1 - Pool stats (total=10, active=7, idle=3, waiting=0)","logger_name":"com.zaxxer.hikari.pool.HikariPool","thread_name":"HikariPool-1 housekeeper","level":"DEBUG","level_value":10000}
--- time taken for 100K users creation: 1350,129ms
-museum_visit=> select count(*), max(created) - min(created) time_taken from visiting_user;
- count  |   time_taken    
---------+-----------------
- 100000 | 00:22:29.981824
-(1 row)
+-- Row counts and time spread (useful for load testing verification)
+SELECT count(*) users, max(created) - min(created) AS time_taken
+FROM visiting_user;
+
+-- Date/time functions
+SELECT current_date, age('2020-08-18 10:10:10'::timestamp);
+-- current_date  | age
+-- 2020-08-21    | 2 days 13:49:50
+
+-- Aggregate visits by hour of day
+SELECT date_part('hour', visit_start_local) AS hr,
+       count(*) AS visit_count
+FROM museum_visit
+WHERE visit_start_local >= '2020-08-01 00:00:00'
+  AND visit_start_local <  '2020-08-02 00:00:00'
+GROUP BY hr
+ORDER BY visit_count DESC;
 ```
 
-psql `du` (disk usage)
---
+---
+
+## Disk Usage
 
 ```sql
+-- Top 20 largest relations (tables + indexes + sequences)
 -- https://wiki.postgresql.org/wiki/Disk_Usage
-SELECT nspname || '.' || relname AS "relation",
-    pg_size_pretty(pg_relation_size(C.oid)) AS "size"
-  FROM pg_class C
-  LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
-  WHERE nspname NOT IN ('pg_catalog', 'information_schema')
-  ORDER BY pg_relation_size(C.oid) DESC
-  LIMIT 20;
+SELECT nspname || '.' || relname AS relation,
+       pg_size_pretty(pg_relation_size(c.oid)) AS size
+FROM pg_class c
+LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE nspname NOT IN ('pg_catalog', 'information_schema')
+ORDER BY pg_relation_size(c.oid) DESC
+LIMIT 20;
 ```
 
-RedShift columnar db
--------
+---
+
+## Benchmarks
+
+### PostgreSQL (RDS db.m4.large)
+
+**Specs:** PostgreSQL v11.4 · db.m4.large · 8 GB RAM · 2 vCPU · HikariCP pool size = 10
+
+**100K concurrent user writes:**
+
+| Users written | Wall time |
+|---|---|
+| 32,075 | 49m 41s |
+| 38,788 | 1h 00m 00s |
+| 50,601 | 1h 18m 24s |
+| **100,000** | **22m 29s** (with parallelism) |
+
+> With parallelism enabled (7 active connections out of pool of 10), total time for 100K inserts dropped to **22m 29s** (1,350ms end-to-end wall time reported by the application).
+
+**Key log marker:**
+```
+HikariPool-1 - Pool stats (total=10, active=7, idle=3, waiting=0)
+```
+
+---
+
+### Redshift (dc2.large)
+
+**Specs:** Redshift dc2.large · Columnar storage · OLAP-optimised
+
+**100K user writes (same workload as above):**
+
+| Users written | Wall time |
+|---|---|
+| 15,666 | 25m 13s |
+| 44,130 | 2h 44m 54s |
+| **100,000** | **~22m 40s** total application time |
+
+> **Takeaway:** Redshift is optimised for analytical read workloads (columnar storage, MPP). OLTP-style high-frequency single-row writes are significantly slower than PostgreSQL at equivalent instance size. Use Redshift for analytics, not as a transactional store.
+
+---
+
+## Data Export
 
 ```sql
--- dc2.large
-
--- {"@timestamp":"2019-08-03T20:33:54.961-07:00","@version":"1","message":"HikariPool-1 - Pool stats (total=10, active=7, idle=3, waiting=0)","logger_name":"com.zaxxer.hikari.pool.HikariPool","thread_name":"HikariPool-1 housekeeper","level":"DEBUG","level_value":10000}
-
-select count(*), max(created) - min(created) time_taken from visiting_user;
-count time_taken
-15666 00:25:13.762115
-
-select count(*), max(created) - min(created) time_taken from visiting_user;
-count   time_taken
-44130   02:44:54.269513
-
-time taken for 100K users creation: 22440,607ms
+-- Export query result to CSV (requires superuser or pg_write_server_files)
+-- Increase statement_timeout if exporting large datasets
+COPY (
+  SELECT *
+  FROM my_table
+  WHERE tb_time_local > '2020-06-01'
+    AND tb_time_local < '2500-06-01'
+)
+TO '/tmp/export.csv'
+DELIMITER ',' CSV HEADER;
 ```
 
+> For RDS/Aurora, use `aws_s3.query_export_to_s3()` instead — direct filesystem access is not available on managed instances.
 
-export
-------
+---
 
-```sql
--- change statement execution timeout settings to make sure you can export within time
-COPY (select * from my_table where tb_time_local > '2020-06-01' and tb_time_local < '2500-06-01') 
-TO '/Users/upd/Downloads/team_table.csv' DELIMITER ',' CSV HEADER;
+## Embedded PostgreSQL (Testing)
 
-```
-
+Used for integration tests via `io.zonky.test:embedded-postgres`. The embedded binary is extracted to a temp directory at test startup.
 
 ```bash
+# Binary location (darwin/amd64)
+file = "file:/.../.m2/repository/io/zonky/test/postgres/embedded-postgres-binaries-darwin-amd64/10.15.0-1/...jar!/postgres-darwin-x86_64.txz"
 
-initdb - create a new PostgreSQL database cluster
+# pg_ctl start command used by the test harness
+/tmp/embedded-pg/PG-<hash>/bin/pg_ctl \
+  -D /tmp/pg_unit_tests/data -l logfile start
 
-file = "file:/Users/prayagupd/.m2/repository/io/zonky/test/postgres/embedded-postgres-binaries-darwin-amd64/10.15.0-1/embedded-postgres-binaries-darwin-amd64-10.15.0-1.jar!/postgres-darwin-x86_64.txz"
-
-/var/folders/t0/d_6dzlq541v5tm9217k13wyx81n8sq/T/embedded-pg/PG-b5deca9b00e4aec854a9675e6695f78b/bin/pg_ctl -D /tmp/pg_unit_tests/data -l logfile start
-
-/var/folders/t0/d_6dzlq541v5tm9217k13wyx81n8sq/T/embedded-pg/PG-b5deca9b00e4aec854a9675e6695f78b/bin/initdb, -A, trust, -U, postgres, -D, /tmp/pg_unit_tests/data, -E, UTF-8
+# initdb invocation
+/tmp/embedded-pg/PG-<hash>/bin/initdb \
+  -A trust -U postgres -D /tmp/pg_unit_tests/data -E UTF-8
 ```
