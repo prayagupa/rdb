@@ -20,3 +20,6 @@ GRANT CONNECT ON DATABASE museumdb TO mu;
 CREATE SCHEMA museumdb;
 GRANT USAGE ON SCHEMA museumdb TO mu;
 
+-- connect to museumdb with
+-- docker exec -it local_pgdb psql -p 5432 -d museumdb -U mu
+

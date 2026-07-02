@@ -1,6 +1,6 @@
 INSERT INTO visiting_user(user_name)
-SELECT ('updupdup')
-WHERE NOT EXISTS (SELECT user_name from visiting_user where user_name='updupdup');
+VALUES ('upadhyay')
+ON CONFLICT DO NOTHING;
 
 INSERT INTO museum_visit(
     user_id,
@@ -13,13 +13,13 @@ INSERT INTO museum_visit(
 )
 SELECT
      1,
-    'Dharahara centre',
+    'The California Academy of Sciences',
     'Front door',
-    '2019-08-02 18:00:00.000000-8',
-    '2019-08-02 18:00:00.000000-8',
-    '2019-08-02 18:10:00.000000-8',
-    '2019-08-02 18:10:00.000000-8'
-WHERE NOT EXISTS ( SELECT museum_name FROM museum_visit WHERE museum_name='Dharahara centre');
+    '2019-08-02 18:00:00.000000-08:00',
+    '2019-08-02 18:00:00.000000',
+    '2019-08-02 18:10:00.000000-08:00',
+    '2019-08-02 18:10:00.000000'
+WHERE NOT EXISTS ( SELECT museum_name FROM museum_visit WHERE museum_name='The California Academy of Sciences');
 
 INSERT INTO museum_visit(
     user_id,
@@ -32,13 +32,13 @@ INSERT INTO museum_visit(
 )
 SELECT
      1,
-    'Golai centre',
+    'Crocker Art Museum',
     'Roof',
-    '2019-09-02 18:00:00.000000-8',
-    '2019-09-02 18:00:00.000000-8',
-    '2019-09-02 18:10:00.000000-8',
-    '2019-09-02 18:10:00.000000-8'
-WHERE NOT EXISTS ( SELECT museum_name FROM museum_visit WHERE museum_name='Golai centre');
+    '2019-09-02 18:00:00.000000-08:00',
+    '2019-09-02 18:00:00.000000',
+    '2019-09-02 18:10:00.000000-08:00',
+    '2019-09-02 18:10:00.000000'
+WHERE NOT EXISTS ( SELECT museum_name FROM museum_visit WHERE museum_name='Crocker Art Museum');
 
 INSERT INTO museum_visit(
     user_id,
@@ -53,10 +53,10 @@ SELECT
      1,
     'Talkot View Tower',
     'Roof',
-    '2019-09-02 18:00:00.000000-8',
-    '2019-09-02 18:00:00.000000-8',
-    '2019-09-02 18:10:00.000000-8',
-    '2019-09-02 18:10:00.000000-8'
+    '2019-09-02 18:00:00.000000-08:00',
+    '2019-09-02 18:00:00.000000',
+    '2019-09-02 18:10:00.000000-08:00',
+    '2019-09-02 18:10:00.000000'
 WHERE NOT EXISTS ( SELECT museum_name FROM museum_visit WHERE museum_name='Talkot View Tower');
 
 INSERT INTO museum_visit(
@@ -70,10 +70,10 @@ INSERT INTO museum_visit(
 )
 SELECT
      1,
-    'Khaptad Trail',
+    'SF Museum of Modern Art',
     'Roof',
-    '2019-09-02 18:00:00.000000-8',
-    '2019-09-02 18:00:00.000000-8',
-    '2019-09-02 18:10:00.000000-8',
-    '2019-09-02 18:10:00.000000-8'
-WHERE NOT EXISTS ( SELECT museum_name FROM museum_visit WHERE museum_name='Khaptad Trail');
+    '2019-09-02 18:00:00.000000-08:00',
+    '2019-09-02 18:00:00.000000',
+    '2019-09-02 18:10:00.000000-08:00',
+    '2019-09-02 18:10:00.000000'
+WHERE NOT EXISTS ( SELECT museum_name FROM museum_visit WHERE museum_name='SF Museum of Modern Art');

@@ -2,7 +2,10 @@
 CREATE TABLE IF NOT EXISTS visiting_user(
     user_id serial PRIMARY KEY,
     user_name VARCHAR(255),
-    created timestamptz DEFAULT CURRENT_TIMESTAMP
+    created_timestamp timestamptz DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated timestamp DEFAULT CURRENT_TIMESTAMP,
+    updated_by VARCHAR(255)
 );
 
 -- https://www.postgresql.org/docs/current/sql-insert.html
@@ -18,7 +21,7 @@ CREATE TABLE IF NOT EXISTS museum_visit (
     visit_start_local TIMESTAMP,
     visit_end_tz TIMESTAMPTZ,
     visit_end_local TIMESTAMP,
-    created timestamptz DEFAULT CURRENT_TIMESTAMP,
+    created_timestamp timestamptz DEFAULT CURRENT_TIMESTAMP,
     visit_history JSON
 );
 

@@ -9,6 +9,10 @@ Production-grade operational reference for PostgreSQL — local setup, CLI workf
 - [Local Setup](#local-setup)
 - [Connecting](#connecting)
 - [Database Inspection](#database-inspection)
+- [Schema](#schema)
+  - [visiting\_user](#visiting_user)
+  - [museum\_visit](#museum_visit)
+- [Seed Data](#seed-data)
 - [Schema & Data Queries](#schema--data-queries)
 - [Disk Usage](#disk-usage)
 - [Benchmarks](#benchmarks)
@@ -36,6 +40,8 @@ docker-compose up pgdb
 ```bash
 # Connect to a running Docker container
 docker exec -it local_pgdb psql -p 5432 -U postgres
+
+## docker exec -it local_pgdb psql -p 5432 -d museumdb -U mu
 
 # Connect via TCP (local or remote)
 psql -h 127.0.0.1 -p 5432 -U postgres
@@ -93,7 +99,8 @@ SELECT CURRENT_TIMESTAMP;
 
 ```sql
 -- Row counts and time spread (useful for load testing verification)
-SELECT count(*) users, max(created) - min(created) AS time_taken
+SELECT count(*) AS users,
+       max(created_timestamp) - min(created_timestamp) AS time_taken
 FROM visiting_user;
 
 -- Date/time functions
@@ -101,7 +108,7 @@ SELECT current_date, age('2020-08-18 10:10:10'::timestamp);
 -- current_date  | age
 -- 2020-08-21    | 2 days 13:49:50
 
--- Aggregate visits by hour of day
+-- Aggregate visits by hour of day (use the local TIMESTAMP column for local-time bucketing)
 SELECT date_part('hour', visit_start_local) AS hr,
        count(*) AS visit_count
 FROM museum_visit
@@ -109,6 +116,14 @@ WHERE visit_start_local >= '2020-08-01 00:00:00'
   AND visit_start_local <  '2020-08-02 00:00:00'
 GROUP BY hr
 ORDER BY visit_count DESC;
+
+-- Cross-timezone analysis: convert stored UTC offset to session timezone
+SELECT museum_name,
+       visit_start_tz AT TIME ZONE 'America/Los_Angeles' AS visit_start_pacific,
+       visit_end_tz   AT TIME ZONE 'America/Los_Angeles' AS visit_end_pacific,
+       EXTRACT(EPOCH FROM (visit_end_tz - visit_start_tz)) / 60 AS duration_minutes
+FROM museum_visit
+ORDER BY visit_start_tz;
 ```
 
 ---
@@ -137,12 +152,12 @@ LIMIT 20;
 
 **100K concurrent user writes:**
 
-| Users written | Wall time |
-|---|---|
-| 32,075 | 49m 41s |
-| 38,788 | 1h 00m 00s |
-| 50,601 | 1h 18m 24s |
-| **100,000** | **22m 29s** (with parallelism) |
+| Users written | Wall time                      |
+|---------------|--------------------------------|
+| 32,075        | 49m 41s                        |
+| 38,788        | 1h 00m 00s                     |
+| 50,601        | 1h 18m 24s                     |
+| **100,000**   | **22m 29s** (with parallelism) |
 
 > With parallelism enabled (7 active connections out of pool of 10), total time for 100K inserts dropped to **22m 29s** (1,350ms end-to-end wall time reported by the application).
 
